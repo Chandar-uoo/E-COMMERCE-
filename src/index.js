@@ -1,6 +1,7 @@
 const { connectDB } = require("./config/db.js");
 const express = require("express");
-const {productRouter} = require("./routes/productRoutes.js"); 
+const {productRouter} = require("./routes/productRoutes/productRoutes.js"); 
+const {authRouter} = require("./routes/authRoutes/signup.js")
 require('dotenv').config()
 
 //server cretaed by express instance
@@ -11,8 +12,8 @@ app.use(express.json());
 
 
 // product
-
 app.use("/",productRouter);
+app.use("/",authRouter);
 // db connection
 connectDB()
 .then(()=>{

@@ -1,4 +1,4 @@
-const productModel = require("../models/productModel");
+const productModel = require("../../models/productModel");
 const express = require("express");
 const { default: mongoose } = require("mongoose");
 const productRouter = express.Router();
