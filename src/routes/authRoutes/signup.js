@@ -68,4 +68,39 @@ authRouter.post("/signup", async (req, res) => {
 
     }
 })
+authRouter.post("/login",async (req,res) => {
+    try {
+        const {email,password} = req.body;
+        const emailExist = await userModel.findOne({email});
+        if(!emailExist){
+            return res.status(400).json({
+                message:"email not found"
+            })
+        }
+        const verifyMatch =  await bcrypt.compare(password,emailExist.password);
+        if(!verifyMatch){
+            return res.status(400).json({
+                message:"password wrong"
+            })
+        };
+        const secretkey = process.env.SECRET_KEY;
+        const token = await jwt.sign({id:this._id},secretkey,{expiresIn:"5h"});
+        res.status(200).cookie(token,{
+            httpOnly:true,
+            secure:false,
+            maxAge:5*60*60
+        }).json({
+            message:"login sucessfull"
+        })
+
+
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({
+            message: "something went wrong"
+        })
+    }
+
+    
+})
 module.exports = { authRouter }
