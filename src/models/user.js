@@ -61,7 +61,7 @@ const userSchema = new mongoose.Schema({
       productId: {
         type: mongoose.Types.ObjectId
       },
-      qunatity: { type: Number }
+      quantity: { type: Number }
     }
   ],
 }

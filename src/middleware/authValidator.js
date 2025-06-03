@@ -10,8 +10,7 @@ const auth = async (req,res,next) => {
     try {
         const secretkey = process.env.SECRET_KEY;
         const decoded = await jwt.verify(token,secretkey);
-        console.log(decoded);
-        const user = await userModel.findById(decoded);
+        const user = await userModel.findById(decoded.id);
         req.user= user;
         next();
     } catch (error) {

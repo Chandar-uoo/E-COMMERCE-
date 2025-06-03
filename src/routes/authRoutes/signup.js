@@ -84,11 +84,11 @@ authRouter.post("/login",async (req,res) => {
             })
         };
         const secretkey = process.env.SECRET_KEY;
-        const token = await jwt.sign({id:this._id},secretkey,{expiresIn:"5h"});
-        res.status(200).cookie(token,{
+        const token = await jwt.sign({id:emailExist._id},secretkey,{expiresIn:"5h"});
+        res.status(200).cookie('token',token,{
             httpOnly:true,
             secure:false,
-            maxAge:5*60*60
+            maxAge:5*60*60*1000
         }).json({
             message:"login sucessfull"
         })
