@@ -2,7 +2,8 @@ const { connectDB } = require("./config/db.js");
 const express = require("express");
 const {productRouter} = require("./routes/productRoutes/productRoutes.js"); 
 const {authRouter} = require("./routes/authRoutes/signup.js");
-const {cartRouter} = require("./routes/cartRouter/cartrouter.js")
+const {cartRouter} = require("./routes/cartRouter/cartrouter.js");
+const {orderRouter} = require("./routes/orderRouter/order.js")
 require('dotenv').config()
 const cookieParser = require("cookie-parser")
 
@@ -18,6 +19,7 @@ app.use(cookieParser())
 app.use("/",productRouter);
 app.use("/",authRouter);
 app.use("/",cartRouter);
+app.use("/",orderRouter);
 // db connection
 connectDB()
 .then(()=>{
