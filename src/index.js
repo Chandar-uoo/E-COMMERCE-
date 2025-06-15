@@ -13,7 +13,11 @@ const cookieParser = require("cookie-parser")
 const app = express();
 // to read all jso data
 // cors 
-app.use(cors());
+
+app.use(cors({
+  origin: 'http://localhost:5173', 
+  credentials: true                
+}));
 app.use(express.json());
 app.use(cookieParser())
 

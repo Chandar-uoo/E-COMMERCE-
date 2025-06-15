@@ -22,14 +22,28 @@ const validator = require("validator")
             message:"bad request"
         })
      }
-
-     user.cart.push({
+     const findProduct = user.cart.find(item => item.productId.toString() === id.toString());
+    if(findProduct){
+        findProduct.quantity +=1;
+        await user.save();
+       return  res.status(200).json({
+            message:"sucess of add",
+            result:{
+                _id:findProduct._id
+            }
+        })
+       
+    } 
+     const newEntry = user.cart.push({
         productId:product._id,
         quantity:1
      });
+     
      await user.save();
+
      res.status(200).json({
-        message:"successfull add to cart"
+        message:"successfull add to cart",
+        result : user.cart[newEntry -1 ]
      });
    } catch (err) {
     console.log(err);

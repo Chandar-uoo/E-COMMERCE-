@@ -57,7 +57,17 @@ authRouter.post("/signup", async (req, res) => {
         })
         const token = jwt.sign({ id: newUser._id }, secretkey, { expiresIn: "5h" });
         res.status(200).cookie('token', token, { httpOnly: true, secure: false, maxAge: 5 * 60 * 60 * 1000, sameSite: true }).json({
-            message: "success of creation"
+            message: "success of creation",
+            result:{
+                id:newUser._id,
+                name:newUser.name,
+                address:newUser.address,
+                DOB:newUser.DOB,
+                gender:newUser.gender,
+                image:newUser.image,
+                phoneNo:newUser.phoneNo,
+                cart:newUser.cart
+             }
         })
 
     } catch (err) {
@@ -90,7 +100,17 @@ authRouter.post("/login",async (req,res) => {
             secure:false,
             maxAge:5*60*60*1000
         }).json({
-            message:"login sucessfull"
+            message:"login sucessfull",
+            result:{
+               id:emailExist._id,
+               name:emailExist.name,
+               address:emailExist.address,
+               DOB:emailExist.DOB,
+               gender:emailExist.gender,
+               image:emailExist.image,
+               phoneNo:emailExist.phoneNo,
+               cart:emailExist.cart
+            }
         })
 
 
