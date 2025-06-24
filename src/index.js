@@ -24,11 +24,11 @@ app.use(cookieParser())
 
 
 // product
-app.use("/",productRouter);
-app.use("/",authRouter);
-app.use("/",userRouter)
-app.use("/",cartRouter);
-app.use("/",orderRouter);
+app.use("/api/products",productRouter);
+app.use("/api/auth",authRouter);
+app.use("/api/user",userRouter)
+app.use("/api/cart",cartRouter);
+app.use("/api/order",orderRouter);
 // db connection
 connectDB();
 

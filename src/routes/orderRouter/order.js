@@ -7,6 +7,6 @@ const orderController = require('../../controllers/orderController.js')
 
 
 
-orderRouter.post("/order/process/:id", auth,orderController.orderMaking )
-orderRouter.patch("/order/payment/sucess", auth,orderController.orderPayment )
+orderRouter.post("/process/:id", auth,orderController.orderMaking )
+orderRouter.patch("/payment/sucess", auth,orderController.orderPayment )
 module.exports = { orderRouter, }

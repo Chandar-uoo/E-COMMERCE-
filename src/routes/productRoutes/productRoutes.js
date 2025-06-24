@@ -5,11 +5,11 @@ productRouter.use(express.json());
 
 const productController = require("../../controllers/productController")
 // search
-productRouter.get('/product/search',auth,productController.searchProduct);
+productRouter.get('/search-product',auth,productController.searchProduct);
 // all products
-productRouter.get("/product", auth,productController.allProducts);
+productRouter.get("/", auth,productController.allProducts);
 // single product
-productRouter.get("/product/:id",auth,productController.singleProduct );
+productRouter.get("/:id",auth,productController.singleProduct );
 
 module.exports = {
     productRouter,
