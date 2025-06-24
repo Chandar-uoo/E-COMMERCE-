@@ -1,7 +1,7 @@
 const { connectDB } = require("./config/db.js");
 const express = require("express");
 const {productRouter} = require("./routes/productRoutes/productRoutes.js"); 
-const {authRouter} = require("./routes/authRoutes/signup.js");
+const {authRouter} = require("./routes/authRoutes/authRoutes.js");
 const {cartRouter} = require("./routes/cartRouter/cartrouter.js");
 const {orderRouter} = require("./routes/orderRouter/order.js");
 const {userRouter} =  require("./routes/userRoutes/userRouter.js");
@@ -30,13 +30,8 @@ app.use("/",userRouter)
 app.use("/",cartRouter);
 app.use("/",orderRouter);
 // db connection
-connectDB()
-.then(()=>{
-    console.log("sucessfully connected");   
-})
-.catch((err)=>{
-    console.error("connection failed");
-});
+connectDB();
+
 app.listen(3000,() => {
     console.log("server started to listen on port 3000");
 } ); 

@@ -1,13 +1,10 @@
-const express = require("express");
-const authRouter = express.Router();
-authRouter.use(express.json());
-const validator = require("validator")
-const { isAtleast18 } = require("../../utils/validators")
-const userModel = require("../../models/user")
+const validator = require("validator");
+const {isAtleast18} = require('../utils/validators');
+const userModel = require('../models/user');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-authRouter.post("/signup", async (req, res) => {
+exports.signup = async (req, res) => {
     try {
         const { name, email, password, address, image, gender, phoneNo, DOB } = req.body;
         if (!name || !email || !password || !image || !gender || !phoneNo || !DOB) {
@@ -77,8 +74,8 @@ authRouter.post("/signup", async (req, res) => {
         })
 
     }
-})
-authRouter.post("/login",async (req,res) => {
+}
+exports.login = async (req,res) => {
     try {
         const {email,password} = req.body;
         const emailExist = await userModel.findOne({email});
@@ -122,5 +119,4 @@ authRouter.post("/login",async (req,res) => {
     }
 
     
-})
-module.exports = { authRouter }
+}
