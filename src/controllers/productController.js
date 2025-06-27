@@ -1,63 +1,45 @@
 const { default: mongoose } = require("mongoose");
 const productModel = require("../models/productModel");
-
-exports.searchProduct = async (req,res) => {
-    try {
-        const query = req.query.q;
-        const products =  await productModel.find({
-           $or:[
-           { ProductName:{$regex:query,$options:'i'}},
-           {category:{$regex:query,$options:'i'}}
-           ]
-        });
-        res.status(200).json({
-            message:'successfull',
-            result:products
-        })
-    } catch (err) {
-        return res.status(500).json({
-            message:"something went wrong",
-            result:err.message
-        })
-    }    
+ const AppError = require("../utils/AppError")
+exports.searchProduct = async (req, res) => {
+    const query = req.query.q;
+    const products = await productModel.find({
+        $or: [
+            { ProductName: { $regex: query, $options: 'i' } },
+            { category: { $regex: query, $options: 'i' } }
+        ]
+    });
+    res.status(200).json({
+        success: true,
+        message: 'successfull',
+        result: products
+    })
 }
 exports.allProducts = async (req, res) => {
-    try {
-        const products = await productModel.find();
-        res.status(200).json({
-            message:"suceess",
-            result:products
-        });
-    } catch (error) {
-        console.log("error")
-        res.status(500).json({
-            message: "failed"
-        })
-    }
+
+    const products = await productModel.find();
+    res.status(200).json({
+        sucess: true,
+        message: "suceess",
+        result: products
+    });
 }
 exports.singleProduct = async (req, res) => {
-    try {
-        const {id} = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            res.status(400).json({
-                message: "invalid request"
-            });
-        }
+    const { id } = req.params;
 
-        const data = await productModel.findById(id);
-
-        if (!data) {
-            res.status(400).json({
-                message: "invalid request"
-            });
-        }
-        res.status(200).json({
-            message: "sucess",
-            result: data
-        })
-    } catch (err) {
-        console.log(err);
-        res.send(err).status(500)
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new AppError("Invalid request: ID is not valid", 400);
     }
+
+    const data = await productModel.findById(id);
+
+    if (!data) {
+        throw new AppError("Invalid request: data not found", 400);
+    }
+    res.status(200).json({
+        success: true,
+        message: "sucess",
+        result: data
+    })
 }

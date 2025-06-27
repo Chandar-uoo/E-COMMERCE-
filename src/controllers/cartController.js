@@ -2,27 +2,27 @@ const express = require("express");
 const productModel = require("../models/productModel");
 const { default: mongoose } = require("mongoose");
 const validator = require("validator");
-
+const AppError = require("../utils/AppError")
 exports.addToCart = async (req, res) => {
-    try {
+
         const user = req.user;
+        if (!req.user) {
+            throw new AppError("Unauthorized", 401);
+        }
         const { id } = req.params;
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({
-                message: "bad request"
-            })
+            throw new AppError("Bad Request", 400);
         }
         const product = await productModel.findById(id);
         if (!product) {
-            return res.status(400).json({
-                message: "bad request"
-            })
+            throw new AppError("Bad Request", 400);
         }
         const findProduct = user.cart.find(item => item.productId.toString() === id.toString());
         if (findProduct) {
             findProduct.quantity += 1;
             await user.save();
             return res.status(200).json({
+                success:true,
                 message: "sucess of add",
                 result: {
                     _id: findProduct._id
@@ -38,85 +38,63 @@ exports.addToCart = async (req, res) => {
         await user.save();
 
         res.status(200).json({
+            success:true,
             message: "successfull add to cart",
             result: user.cart[newEntry - 1]
         });
-    } catch (err) {
-        console.log(err);
-        res.status(400).json({
-            message: "something went wrong"
-        })
-
-    }
+   
 }
 exports.readCart = async (req, res) => {
-    try {
+
         const user = req.user;
+        if (!req.user) {
+            throw new AppError("Unauthorized", 401);
+        }
         const data = user.cart;
         res.status(200).json({
+            success:true,
             message: "sucees",
             result: data
         })
-    } catch (err) {
-        res.status(500).json({
-            message: 'something went wrong'
-        })
-    }
+    
 }
 exports.updateCart = async(req,res)=>{
-    try {
+
         const {id} = req.params;
         const {quantity} = req.body;
         if (!Number.isInteger(quantity)) {
-            return res.status(400).json({ message: 'not valid' });
-          }
+            throw new AppError("Quantity must be an integer", 400);
+        }
         const user = req.user;
         const findProduct = user.cart.find(item => item.productId.toString() === id.toString());
-        if(!findProduct){
-            return res.status(400).json({
-                message:"invalid details"
-            })
+        if (!findProduct) {
+            throw new AppError("Invalid details", 400);
         }
        const result = findProduct.quantity +=quantity;
         await user.save();
         res.status(200).json({
+            success:true,
+            message:"sucessful",
             data : findProduct,
         })
 
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({
-            message:"something wrong"
-        })
-        
-    }
  }
  exports.deleteCart = async (req,res) => {
-     try {
+    
          const {id} = req.params;
          const user = req.user;
-         if(!mongoose.Types.ObjectId.isValid(id)){
-             return res.status(400).json({
-                 message:"bad request"
-             })
-         }
+         if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new AppError("Bad Request: Invalid ID", 400);
+        }
           const product = await productModel.findById(id);
-          if(!product) {
-             return res.status(400).json({
-                 message:"failed"
-             })
-          }
+          if (!product) {
+            throw new AppError("Product not found", 400);
+        }
           user.cart = user.cart.filter(item => item.productId.toString() !== id.toString());
           await user.save();
           res.status(200).json({
+            sucess:true,
              message:"sucess",
              result:id
           })
-     } catch (err) {
-         console.log(err);
-         return res.status(500).json({
-             message:"something went wrong"
-         })
-         
-     }
   }
