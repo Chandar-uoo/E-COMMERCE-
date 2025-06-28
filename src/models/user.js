@@ -59,7 +59,8 @@ const userSchema = new mongoose.Schema({
   cart: [
     {
       productId: {
-        type: mongoose.Types.ObjectId
+        type: mongoose.Types.ObjectId,
+        ref:"Product"
       },
       quantity: { type: Number }
     }
@@ -67,4 +68,4 @@ const userSchema = new mongoose.Schema({
 }
 );
 
-module.exports = mongoose.model("userModel", userSchema);
+module.exports = mongoose.model("User", userSchema);

@@ -3,18 +3,12 @@ const mongoose = require("mongoose");
 const orderModel = new mongoose.Schema({
     productId: {
         type: mongoose.Types.ObjectId,
+        ref:"Product",
         required: true
     },
     userId: {
         type: mongoose.Types.ObjectId,
-        required: true
-    },
-    address: {
-        type: String,
-        required: true
-    },
-    price: {
-        type: String,
+        ref:"User",
         required: true
     },
     paymentStatus: {

@@ -1,6 +1,5 @@
 const express = require("express");
 const { default: mongoose } = require("mongoose");
-const validator = require("validator");
 const productModel = require("../models/productModel");
 const AppError = require('../utils/AppError');
 
@@ -46,6 +45,7 @@ exports.readCartService = async (req, res) => {
         if (!req.user) {
             throw new AppError("Unauthorized", 401);
         }
+        await user.populate("cart.productId","ProductName price img category description ")
         const data = user.cart;
         return data;
 }
