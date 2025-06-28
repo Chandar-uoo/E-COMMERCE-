@@ -1,9 +1,7 @@
- const AppError =  require('../utils/AppError')
+const userServices = require("../services/userServices");
+
 exports.userCheck = (req, res) => {
-    const user = req.user;
-    if (!user) {
-        throw new AppError("Please login", 401);
-    }
+    const user = userServices.userCheckService(req,res);
     res.status(200).json({
         success: true,
         message: "user details",
