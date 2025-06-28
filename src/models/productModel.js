@@ -11,4 +11,6 @@ const productSchema =  new mongoose.Schema({
 },{
     timestamps:true
 });
+// index 
+productSchema.index({category:1},{ProductName:1});
 module.exports = mongoose.model("Product",productSchema);

@@ -25,7 +25,6 @@ exports.orderMakingService = async (req, res) => {
         productId: product._id,
         userId: user._id,
         address: user.address,
-        price: product.price,
         paymentStatus: "unpaid",
         orderStatus: "processing"
     })
