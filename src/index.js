@@ -31,7 +31,7 @@ app.use("/api/order", orderRouter);
 
 // error handling miidle ware
 app.use((err, req, res, next) => {
-  console.log('Error', err.message);
+  console.log('Error', err);
   const statusCode = err.statusCode || 500;
   const message = err.message || 'something went wrong';
   const isOperational = err.isOperational || false;
