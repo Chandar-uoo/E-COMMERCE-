@@ -13,4 +13,4 @@ const productSchema =  new mongoose.Schema({
 });
 // index 
 productSchema.index({category:1},{ProductName:1});
-module.exports = mongoose.model("Product",productSchema);
+module.exports = mongoose.model("productModel",productSchema);

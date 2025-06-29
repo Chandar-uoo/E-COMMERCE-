@@ -60,12 +60,11 @@ const userSchema = new mongoose.Schema({
     {
       productId: {
         type: mongoose.Types.ObjectId,
-        ref:"Product"
+        ref:"productModel"
       },
       quantity: { type: Number }
     }
   ],
 }
 );
-userSchema.index({email:1},{unique:true});
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("userModel", userSchema);

@@ -23,13 +23,10 @@ const productModel =  require("../models/productModel");
  exports.singleProductService =  async (req, res) => {
 
     const { id } = req.params;
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
         throw new AppError("Invalid request: ID is not valid", 400);
     }
-
     const data = await productModel.findById(id);
-
     if (!data) {
         throw new AppError("Invalid request: data not found", 400);
     }

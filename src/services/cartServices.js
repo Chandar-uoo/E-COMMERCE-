@@ -21,13 +21,10 @@ exports.addToCartService = async (req, res) => {
     if (findProduct) {
         findProduct.quantity += 1;
         await user.save();
-        return res.status(200).json({
-            success:true,
-            message: "sucessfully item quantity updated",
-            result: {
-                _id: findProduct._id
-            }
-        })
+        return {
+            handled:true,
+            data:findProduct._id,
+        } 
 
     }
     const newItem = user.cart.push({
