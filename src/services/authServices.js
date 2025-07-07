@@ -75,3 +75,5 @@ exports.logoutService = (req, res) => {
         secure: false,
     });
 }
+
+userModel.updateMany({},{$set:{role:"user"}});

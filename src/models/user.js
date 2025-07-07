@@ -56,6 +56,11 @@ const userSchema = new mongoose.Schema({
     enum: ["male", "female", "other"],
     required: true
   },
+  role:{
+    type:String,
+    enum:["user","admin"],
+    default:"user"
+  },
   cart: [
     {
       productId: {
