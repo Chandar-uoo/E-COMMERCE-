@@ -8,5 +8,7 @@ const authController = require("../../controllers/authController")
 authRouter.post("/signup", catchAsync(authController.signup));
 // login
 authRouter.post("/login",catchAsync(authController.login));
+// logout
+authRouter.get('/logout',catchAsync(authController.logout));
 
 module.exports = { authRouter }

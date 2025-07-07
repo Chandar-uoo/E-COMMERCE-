@@ -46,3 +46,11 @@ exports.login = async (req, res) => {
         }
     })
 }
+
+exports.logout = async (req,res)=>{
+    const logoutUser =  await authServices.logoutService(req,res);
+    res.status(200).json({
+        success:true,
+        message:"logout Suceesfully"
+    })
+}
