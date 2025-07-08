@@ -1,24 +1,24 @@
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user")
-const auth = async (req,res,next) => {
-    const token  = req.cookies.token;
-    if(!token){
-         return res.status(401).json({
-            message:"please login"
+const auth = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer")) {
+        return res.status(401).json({
+            message: "unAuthorized"
         })
     }
     try {
-        const secretkey = process.env.SECRET_KEY;
-        const decoded = await jwt.verify(token,secretkey);
+        const token = authHeader.split(" ")[1];
+        const decoded = await jwt.verify(token,process.env.ACCESS_TOKEN);
         const user = await userModel.findById(decoded.id);
-        req.user= user;
+        req.user = user;
         next();
     } catch (error) {
         console.log(error);
         res.status(400).json({
-            message:"please login"
+            message: "Invalid or expired token"
         })
-        
+
     }
 }
-module.exports = {auth,}
+module.exports = { auth,}

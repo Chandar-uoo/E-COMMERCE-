@@ -21,6 +21,10 @@ exports.signupService = async (req, res) => {
     if (!validator.isURL(image)) {
         throw new AppError("Url not valid", 400);
     }
+    const existingPhoneNo =  await userModel.findOne({phoneNo});
+    if(existingPhoneNo){
+        throw new AppError("user already present with this phone", 409)
+    }
     if (!validator.isMobilePhone(phoneNo)) {
         throw new AppError('phoneNo not valid', 400);
     }
@@ -33,7 +37,8 @@ exports.signupService = async (req, res) => {
     }
 
     const hashedpassword = await bcrypt.hash(password, 10);
-    const secretkey = process.env.SECRET_KEY;
+    const refreshKey = process.env.REFRESH_TOKEN;
+    const accessKey = process.env.ACCESS_TOKEN;
     const newUser = await userModel.create({
         name,
         email,
@@ -44,8 +49,9 @@ exports.signupService = async (req, res) => {
         phoneNo,
         password: hashedpassword
     })
-    const token = jwt.sign({ id: newUser._id }, secretkey, { expiresIn: "5h" });
-    return { newUser, token }
+    const refreshToken = jwt.sign({ id: newUser._id }, refreshKey, { expiresIn: "5h" });
+    const accessToken = jwt.sign({ id: newUser._id }, accessKey, { expiresIn: "15m" });
+    return { newUser, refreshToken, accessToken }
 }
 
 // login 
@@ -60,11 +66,14 @@ exports.loginService = async (req, res) => {
     if (!verifyMatch) {
         throw new AppError("Invalid email or password", 400);
     };
-    const secretkey = process.env.SECRET_KEY;
-    const token = await jwt.sign({ id: emailExist._id }, secretkey, { expiresIn: "5h" });
+    const refreshKey = process.env.REFRESH_TOKEN;
+    const accessKey = process.env.ACCESS_TOKEN;
+    const refreshToken = await jwt.sign({ id: emailExist._id }, refreshKey, { expiresIn: "5h" });
+    const accessToken = await jwt.sign({ id: emailExist._id }, accessKey, { expiresIn: "5h" });
+
 
     // return
-    return { emailExist, token };
+    return { emailExist, refreshToken, accessToken };
 }
 
 // logout
@@ -76,4 +85,24 @@ exports.logoutService = (req, res) => {
     });
 }
 
-userModel.updateMany({},{$set:{role:"user"}});
+exports.accessTokenRenwal = async (req, res) => {
+    const token = req.cookies.refreshToken;
+    if (!token) {
+        return res.status(401).json({
+            success: false,
+            message: "No refreshToken found"
+        })
+    }
+    const decoded = await jwt.verify(token, process.env.REFRESH_TOKEN);
+    const user = await userModel.findById(decoded.id);
+    if (!user) {
+        return res.status(401).json({
+            success: false,
+            message: "user Not found"
+        })
+    }
+    const accessKey = process.env.ACCESS_TOKEN;
+    const accessToken = await jwt.sign({ id: user._id }, accessKey, { expiresIn: "5h" });
+
+    return {accessToken};
+}
