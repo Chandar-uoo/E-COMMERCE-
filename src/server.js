@@ -11,7 +11,6 @@ const app =  require("./index.js");
 
 // db connection
 connectDB();
-
  const server = app.listen(3000,() => {
     console.log("server started to listen on port 3000");
 } ); 

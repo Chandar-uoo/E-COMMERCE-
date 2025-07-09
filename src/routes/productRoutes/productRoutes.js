@@ -5,6 +5,8 @@ const catchAsync = require('../../utils/catchAsync')
 productRouter.use(express.json());
 
 const productController = require("../../controllers/productController")
+
+
 // search
 productRouter.get('/search-product',auth,catchAsync(productController.searchProduct));
 // all products
