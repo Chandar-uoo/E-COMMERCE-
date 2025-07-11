@@ -20,5 +20,9 @@ adminRouter.delete("/delete-product/:id",auth,roleCheck("admin"),catchAsync(admi
 adminRouter.get("/orders",auth,roleCheck("admin"),catchAsync(adminController.fetchOrder));
 // fetch user
 adminRouter.get("/user",auth,roleCheck("admin"),catchAsync(adminController.fetchUser));
+//fetch order = paid & paymentStatus processing
+adminRouter.get("/orders-to-fullfill",auth,roleCheck("admin"),catchAsync(adminController.ordersToFullfill));
+// updateOrderStatus
+adminRouter.patch("/update-Order-Status/:id",auth,catchAsync(adminController.updateOrderStatus));
 
-module.exports = {adminRouter}
+module.exports = {adminRouter};

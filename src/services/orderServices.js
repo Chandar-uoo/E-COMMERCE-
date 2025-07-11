@@ -43,7 +43,6 @@ exports.orderPaymentService = async (req, res) => {
     const order = await orderModel.findByIdAndUpdate(orderId, {
         paymentStatus: "paid",
         payMethod: payMethod,
-        orderStatus: "shipped"
     }, { new: true });
 
     return order;

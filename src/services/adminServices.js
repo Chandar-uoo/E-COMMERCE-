@@ -81,12 +81,45 @@ exports.deleteProductSevice = async (req, res) => {
     return deleteProduct;
 }
 // fetch user
-exports.fetchUserService =  async(req,res)=>{
- const users = await userModel.find({});
- return users;
+exports.fetchUserService = async (req, res) => {
+    const users = await userModel.find({});
+    return users;
 }
 // fetchOrders
-exports.fetchOrdersService =  async(req,res)=>{
-    const orders =  await orderModel.find({});
+exports.fetchOrdersService = async (req, res) => {
+    const orders = await orderModel.find({});
     return orders;
+}
+// order to fullfill
+exports.ordersToFullfillService = async (req, res) => {
+    const orders = await orderModel.find({
+        $and: [
+            { paymentStatus: "paid" },
+            { orderStatus: "processing" }
+        ]
+    })
+    return orders;
+}
+// update order as shipped
+exports.updateOrderStatusService = async (req, res) => {
+    const { id } = req.params;
+    const changeOrderStatus = req.body.status;
+    // checking is the payment is paid for the product
+    const order = await orderModel.findById(id);
+    // checking the changeOrderStatus is valid 
+    const allowedStatus = ["delivered", "failure", "shipped"];
+    if (!allowedStatus.includes(changeOrderStatus)) {
+        throw new AppError("Invalid Status to change order", 404);
+    }
+    const status = order.paymentStatus === "paid" ? true : false;
+    if (!status) {
+        return res.status(409).json({
+            success: false,
+            message: "payment has not been done for the product"
+        })
+    }
+    order.orderStatus = changeOrderStatus;
+    await order.save();
+    return order;
+
 }

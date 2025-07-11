@@ -55,3 +55,22 @@ exports.fetchOrder = async(req,res)=>{
     }) 
 }
 
+// fetch all orders =  paid & processing
+
+exports.ordersToFullfill = async(req,res)=>{
+    const data = await adminServices.ordersToFullfillService(req,res);
+    res.status(200).json({
+        success:true,
+        message:"admin fetched all order with payment status paid and order status proceesing",
+        result:data
+    }) 
+}
+exports.updateOrderStatus = async(req,res)=>{
+    const {status} = req.body;
+    const data = await adminServices.updateOrderStatusService(req,res);
+    res.status(200).json({
+        success:true,
+        message:`admin replaced order status proceesing to ${status} `,
+        result:data
+    }) 
+}
