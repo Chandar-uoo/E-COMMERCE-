@@ -1,19 +1,28 @@
 const express = require("express");
+const app = express();
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
+const rateLimit =  require("express-rate-limit");
 const { productRouter } = require("./routes/productRoutes/productRoutes.js");
 const { authRouter } = require("./routes/authRoutes/authRoutes.js");
 const { cartRouter } = require("./routes/cartRouter/cartrouter.js");
 const { orderRouter } = require("./routes/orderRouter/order.js");
 const { userRouter } = require("./routes/userRoutes/userRouter.js");
-const {adminRouter} =  require("./routes/adminRoutes.js")
+const { adminRouter } = require("./routes/adminRoutes.js");
 require('dotenv').config();
-const cors = require("cors")
-const cookieParser = require("cookie-parser")
 
-//server cretaed by express instance
-const app = express();
-// to read all jso data
+// helmet
+app.use(helmet());
+// rate limit
+const limiter =  rateLimit({
+  windowMs:15*60*1000,
+  max:100,
+  message:"too many requests please try later on"
+})
+app.use("/api",limiter)
+
 // cors 
-
 app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true
@@ -24,7 +33,7 @@ app.use(cookieParser())
 
 
 // product
-app.use("/api/admin",adminRouter)
+app.use("/api/admin", adminRouter)
 app.use("/api/products", productRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter)
