@@ -4,8 +4,12 @@ const orderModel = require("../models/orderModel")
 const { default: mongoose } = require("mongoose");
 const AppError = require("../utils/AppError");
 exports.fetchProductService = async (req, res) => {
-    const products = await productModel.find();
-    return products;
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(Number(req.query.limt) || 10));
+    const skip = (page - 1) * limit;
+    const products = await productModel.find().limit(limit).skip(skip);
+    const total = await productModel.countDocuments();
+    return { products, total, limit, page };
 }
 
 // add product 
@@ -82,23 +86,36 @@ exports.deleteProductSevice = async (req, res) => {
 }
 // fetch user
 exports.fetchUserService = async (req, res) => {
-    const users = await userModel.find({});
-    return users;
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(Number(req.query.limt) || 10));
+    const skip = (page - 1) * limit;
+    const users = await userModel.find({}).limit(limit).skip(skip);
+    const total = await userModel.countDocuments();
+    return { users, total, limit, page };
 }
 // fetchOrders
 exports.fetchOrdersService = async (req, res) => {
-    const orders = await orderModel.find({});
-    return orders;
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(Number(req.query.limt) || 10));
+    const skip = (page - 1) * limit;
+    const orders = await orderModel.find({}).limit(limit).skip(skip);
+    const total = await orderModel.countDocuments();
+    return { orders, total, limit, page };
 }
 // order to fullfill
 exports.ordersToFullfillService = async (req, res) => {
-    const orders = await orderModel.find({
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(Number(req.query.limt) || 10));
+    const skip = (page - 1) * limit;
+    const filter = {
         $and: [
             { paymentStatus: "paid" },
             { orderStatus: "processing" }
         ]
-    })
-    return orders;
+    }
+    const orders = await orderModel.find(filter).limit(40).skip(skip);
+    const total =  await orderModel.countDocuments(filter);
+    return { orders, total, limit, page };
 }
 // update order as shipped
 exports.updateOrderStatusService = async (req, res) => {
