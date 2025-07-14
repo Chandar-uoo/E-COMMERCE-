@@ -78,7 +78,7 @@ exports.loginService = async (req, res) => {
 
 // logout
 exports.logoutService = (req, res) => {
-    res.clearCookie("token", {
+    res.clearCookie("refreshToken", {
         httpOnly: true,
         sameSite: "lax",
         secure: false,
