@@ -1,9 +1,14 @@
-const orderModel = require("../models/orderModel.js");
-const productModel = require('../models/productModel.js');
-const { default: mongoose } = require("mongoose");
-const AppError = require("../utils/AppError.js");
+
 const orderServices  = require("../services/orderServices.js");
 
+exports.readOrder =  async(req,res)=>{
+    const order =  await orderServices.readOrderService(req,res);
+    res.status(200).json({
+        success: true,
+        message: " order processing",
+        result: order,
+    })
+}
 exports.orderMaking = async (req, res) => {
 
     const order = await orderServices.orderMakingService(req,res);

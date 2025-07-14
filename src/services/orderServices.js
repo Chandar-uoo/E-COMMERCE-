@@ -3,6 +3,22 @@ const orderModel = require("../models/orderModel");
 const productModel = require("../models/productModel");
 const AppError = require("../utils/AppError");
 
+
+exports.readOrderService = async(req,res)=>{
+    const user = req.user;
+    if (!user) {
+        throw new AppError("Unauthorized", 401);
+    }
+    // find orders that has been delivered ,shipped
+    const filter = {
+        $and: [
+            { paymentStatus: "paid" },
+            { orderStatus:{$in:["delivered","shipped","processing"]}}
+        ]
+    }
+    const data =  await orderModel.find(filter).populate({path:"productId",select:"ProductName price img category description"}).limit(10);
+    return data;
+}
 exports.orderMakingService = async (req, res) => {
 
     const user = req.user;
