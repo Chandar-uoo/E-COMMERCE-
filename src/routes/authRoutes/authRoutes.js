@@ -11,5 +11,5 @@ authRouter.post("/login",catchAsync(authController.login));
 // logout
 authRouter.get('/logout',catchAsync(authController.logout));
 // access token renewal
-authRouter.post('/refresh-token',catchAsync(authController.refreshToken))
+authRouter.get('/refresh-token',catchAsync(authController.refreshToken))
 module.exports = { authRouter }
