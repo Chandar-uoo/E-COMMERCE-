@@ -33,6 +33,7 @@ exports.addToCartService = async (req, res) => {
     });
 
     await user.save();
+    await user.populate("cart.productId","ProductName price img category description ");
     return {newItem,user};
 }
 
@@ -43,8 +44,7 @@ exports.readCartService = async (req, res) => {
             throw new AppError("Unauthorized", 401);
         }
         await user.populate("cart.productId","ProductName price img category description ")
-        const data = user.cart;
-        return data;
+        return user.cart;
 }
 
 exports.updateCartService = async(req,res)=>{
@@ -59,7 +59,7 @@ exports.updateCartService = async(req,res)=>{
     if (!findProduct) {
         throw new AppError("Invalid details", 400);
     }
-   const result = findProduct.quantity +=quantity;
+    findProduct.quantity = quantity;
     await user.save();
     return findProduct;
 }
