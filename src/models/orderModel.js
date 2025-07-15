@@ -1,35 +1,50 @@
 const mongoose = require("mongoose");
 
 const orderModel = new mongoose.Schema({
-    productId: {
-        type: mongoose.Types.ObjectId,
-        ref:"productModel",
-        required: true
-    },
     userId: {
         type: mongoose.Types.ObjectId,
-        ref:"userModel",
+        ref: "userModel",
         required: true
     },
+    items: [
+        {
+            productId: {
+                type: mongoose.Types.ObjectId,
+                ref: "productModel",
+                required: true
+            },
+            quantity: {
+                type: Number,
+                required: true,
+                min: 1
+            },
+        }
+    ],
     address: {
         type: String,
-        required: true
+        required: true,
+        trim: true,
+        minlength: 5,
+        maxlength: 100,
+        required: true,
     },
     paymentStatus: {
         type: String,
         enum: ["paid", "unpaid"],
-        required: true
+        required: true,
+        default: "unpaid",
     },
     payMethod: {
         type: String,
-        enum: ["cod", "netPay","idle"],
-        default:"idle",
-        required: true
+        enum: ["cod", "netPay", "idle"],
+        default: "idle",
+        required: true,
     },
     orderStatus: {
         type: String,
-        enum: ["pending","processing", "delivered", "failure", "shipped", "idle"],
-        required: true
+        enum: ["cancelled", "processing", "delivered", "shipped", "idle"],
+        required: true,
+        default: "idle"
     }
 }, {
     timestamps: true,
