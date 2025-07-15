@@ -10,6 +10,7 @@ const { cartRouter } = require("./routes/cartRouter/cartrouter.js");
 const { orderRouter } = require("./routes/orderRouter/order.js");
 const { userRouter } = require("./routes/userRoutes/userRouter.js");
 const { adminRouter } = require("./routes/adminRoutes.js");
+const { startOrderCleaner } = require('./cron/orderCleaner.js');
 require('dotenv').config();
 
 // helmet
@@ -21,7 +22,9 @@ const limiter =  rateLimit({
   message:"too many requests please try later on"
 })
 app.use("/api",limiter)
+// corn
 
+startOrderCleaner();
 // cors 
 app.use(cors({
   origin: 'http://localhost:5173',
