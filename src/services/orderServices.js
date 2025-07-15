@@ -25,37 +25,33 @@ exports.orderMakingService = async (req, res) => {
     if (!user) {
         throw new AppError("Unauthorized", 401);
     }
-    const { id } = req.params;
-    // check product and find the id is true
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        throw new AppError("Bad Request", 400);
+    const { itemsFromClient } = req.body;
+    if (itemsFromClient && itemsFromClient.length === 0) {
+        throw new AppError("No items provided", 400);
     }
+    const validItems = itemsFromClient.map(item => {
+        if (!mongoose.Types.ObjectId.isValid(item.productId)) {
+            throw new AppError("Bad Request", 400);
+        }
 
-    const product = await productModel.findById(id);
+        const product = async()=>{
+            await productModel.findById(item.productId)
+        }
 
-    if (!product) {
-        throw new AppError("Bad Request", 400);
-    }
-    // check is order already present
-    const filter = {
-        userId: user._id,
-        items: { $elemMatch: { productId: product._id } },
-        paymentStatus: "unpaid",
-        orderStatus: { $in: ["idle", "processing"] },
-    }
-    const existingOrder = await orderModel.findOne(filter);
-    if (existingOrder) {
-        // if order is already present, update the quantity
-        const updatedOrder = await orderModel.findOneAndUpdate(
-            { _id: existingOrder._id, "items.productId": product._id },
-            { $inc: { "items.$.quantity": 1 } },
-            { new: true }
-        );
-        return updatedOrder;
-    }
+        if (!product) {
+            throw new AppError("Bad Request", 400);
+        }
+        if(item.quantity && typeof item.quantity !== "number"){
+         throw new AppError("Invalid quantity", 400);   
+        }
+        return {
+            productId: product._id,
+            quantity: item.quantity || 1,
+        };
+    })
     const newOrder = await orderModel.create({
         userId: user._id,
-        items: [{ productId: product._id, quantity: 1 }],
+        items: validItems,
         address: user.address,
         paymentStatus: "unpaid",
         orderStatus: "processing",
@@ -80,4 +76,3 @@ exports.orderPaymentService = async (req, res) => {
 
     return order;
 }
-// order delete
