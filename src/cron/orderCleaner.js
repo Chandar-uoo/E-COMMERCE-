@@ -1,6 +1,6 @@
 const orderModel = require('../models/orderModel');
-const corn =  require('node-cron');
-const deleteUnPaidOrder = async (req, res) => {
+const {CronJob}=  require("cron");
+const deleteUnPaidOrder = async () => {
     const tenminutesAgo = new Date(Date.now() - 10 * 60 * 1000);
      const filter = {
          paymentStatus: "unpaid",
@@ -10,14 +10,16 @@ const deleteUnPaidOrder = async (req, res) => {
  };
 
  const startOrderCleaner = () => {
-     corn.schedule('*/10 * * * *', async () => {
-         try {
-             await deleteUnPaidOrder();
-             console.log('Unpaid orders older than 10 minutes deleted successfully');
-         } catch (error) {
-             console.error('Error deleting unpaid orders:', error);
-         }
-     });
+    const job = new CronJob('*/10 * * * *', async () => {
+        try {
+          await deleteUnPaidOrder();
+          console.log('🕒 Order cleanup job ran');
+        } catch (error) {
+          console.error('Error running cron job:', error);
+        }
+      });
+    
+      job.start(); 
  }
  module.exports = {
      startOrderCleaner
