@@ -4,7 +4,7 @@ const productModel = require("../models/productModel");
 const AppError = require("../utils/AppError");
 
 
-exports.readOrderService = async(req,res)=>{
+exports.readOrderService = async (req, res) => {
     const user = req.user;
     if (!user) {
         throw new AppError("Unauthorized", 401);
@@ -13,10 +13,10 @@ exports.readOrderService = async(req,res)=>{
     const filter = {
         $and: [
             { paymentStatus: "paid" },
-            { orderStatus:{$in:["delivered","shipped","processing"]}}
+            { orderStatus: { $in: ["delivered", "shipped", "processing"] } }
         ]
     }
-    const data =  await orderModel.find(filter).populate({path:"productId",select:"ProductName price img category description"}).limit(10);
+    const data = await orderModel.find(filter).populate({ path: "productId", select: "ProductName price img category description" }).limit(10);
     return data;
 }
 exports.orderMakingService = async (req, res) => {
@@ -36,15 +36,32 @@ exports.orderMakingService = async (req, res) => {
     if (!product) {
         throw new AppError("Bad Request", 400);
     }
-
-    const order = await orderModel.create({
-        productId: product._id,
+    // check is order already present
+    const filter = {
         userId: user._id,
+        items: { $elemMatch: { productId: product._id } },
+        paymentStatus: "unpaid",
+        orderStatus: { $in: ["idle", "processing"] },
+    }
+    const existingOrder = await orderModel.findOne(filter);
+    if (existingOrder) {
+        // if order is already present, update the quantity
+        const updatedOrder = await orderModel.findOneAndUpdate(
+            { _id: existingOrder._id, "items.productId": product._id },
+            { $inc: { "items.$.quantity": 1 } },
+            { new: true }
+        );
+        return updatedOrder;
+    }
+    const newOrder = await orderModel.create({
+        userId: user._id,
+        items: [{ productId: product._id, quantity: 1 }],
         address: user.address,
         paymentStatus: "unpaid",
-        orderStatus: "processing"
+        orderStatus: "processing",
+        payMethod: "idle",
     })
-    return order;
+    return newOrder;
 }
 
 exports.orderPaymentService = async (req, res) => {
@@ -63,3 +80,4 @@ exports.orderPaymentService = async (req, res) => {
 
     return order;
 }
+// order delete

@@ -5,7 +5,7 @@ exports.readOrder =  async(req,res)=>{
     const order =  await orderServices.readOrderService(req,res);
     res.status(200).json({
         success: true,
-        message: " order processing",
+        message: "order fetched",
         result: order,
     })
 }
@@ -15,7 +15,7 @@ exports.orderMaking = async (req, res) => {
 
     res.status(200).json({
         success: true,
-        message: " order processing",
+        message:"order created",
         result: order,
         orderId: order._id,
     })
