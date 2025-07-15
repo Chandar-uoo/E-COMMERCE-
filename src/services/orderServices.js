@@ -29,26 +29,29 @@ exports.orderMakingService = async (req, res) => {
     if (itemsFromClient && itemsFromClient.length === 0) {
         throw new AppError("No items provided", 400);
     }
-    const validItems = itemsFromClient.map(item => {
-        if (!mongoose.Types.ObjectId.isValid(item.productId)) {
-            throw new AppError("Bad Request", 400);
+    const validItems = [];
+
+    for (const item of itemsFromClient) {
+        const { productId, quantity } = item;
+
+        if (!mongoose.Types.ObjectId.isValid(productId)) {
+            throw new AppError("Invalid product ID", 400);
         }
 
-        const product = async()=>{
-            await productModel.findById(item.productId)
-        }
-
+        const product = await productModel.findById(productId);
         if (!product) {
-            throw new AppError("Bad Request", 400);
+            throw new AppError(`Product not found: ${productId}`, 404);
         }
-        if(item.quantity && typeof item.quantity !== "number"){
-         throw new AppError("Invalid quantity", 400);   
+
+        if (quantity !== undefined && typeof quantity !== "number") {
+            throw new AppError("Invalid quantity type", 400);
         }
-        return {
+
+        validItems.push({
             productId: product._id,
-            quantity: item.quantity || 1,
-        };
-    })
+            quantity: quantity || 1,
+        });
+    }
     const newOrder = await orderModel.create({
         userId: user._id,
         items: validItems,
