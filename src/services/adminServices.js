@@ -15,7 +15,7 @@ exports.fetchProductService = async (req, res) => {
 // add product 
 
 exports.addProductService = async (req, res) => {
-    const { ProductName, category, description, price, img, stock, rating, } = req.body;
+    const { ProductName, category, description, price, img, stock, rating, } = req.body.product;
 
     if (!ProductName || !category || !description || !price || !img || !stock || !rating) {
         return res.status(400).json({
@@ -43,8 +43,8 @@ exports.addProductService = async (req, res) => {
 }
 // update product
 exports.updateProductService = async (req, res) => {
-    const { id } = req.params;
-    const updateFields = req.body;
+  
+   const { id,updateFields  } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         throw new AppError("Bad Request", 400);
