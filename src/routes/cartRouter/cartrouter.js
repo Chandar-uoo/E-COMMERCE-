@@ -15,4 +15,6 @@ const catchAsync  = require('../../utils/catchAsync')
  cartRouter.patch("/update/:id",auth,catchAsync(cartController.updateCart))
  // delete
  cartRouter.delete("/delete/:id",auth,catchAsync(cartController.deleteCart))
+ // clear cart
+cartRouter.delete("/clear",auth,catchAsync(cartController.clearCart))
  module.exports = {cartRouter,}

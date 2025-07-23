@@ -57,3 +57,11 @@ exports.deleteCart = async (req, res) => {
         result: product._id
     })
 }
+exports.clearCart = async (req, res) => {
+    const cart = await cartServices.clearCartService(req, res);
+    res.status(200).json({
+        success: true,
+        message: "cart cleared",
+        result: cart
+    })
+}

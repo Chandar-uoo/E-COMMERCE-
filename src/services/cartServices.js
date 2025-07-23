@@ -2,6 +2,7 @@ const express = require("express");
 const { default: mongoose } = require("mongoose");
 const productModel = require("../models/productModel");
 const AppError = require('../utils/AppError');
+const userModel = require("../models/user");
 
 exports.addToCartService = async (req, res) => {
 
@@ -40,7 +41,7 @@ exports.addToCartService = async (req, res) => {
 exports.readCartService = async (req, res) => {
 
         const user = req.user;
-        if (!req.user) {
+        if (!user) {
             throw new AppError("Unauthorized", 401);
         }
         await user.populate("cart.productId","ProductName price img category description ")
@@ -80,4 +81,16 @@ exports.deleteCartServices = async (req,res) => {
      await user.save();
 
      return product;
+}
+
+exports.clearCartService = async(req,res)=>{
+  const user = req.user;
+  if(!user){
+    throw new AppError("unAuthorized",401);
+  }
+  const clear =  await userModel.updateOne({_id:user._id},{$set:{cart:[]}});
+    if(!clear){ 
+        throw new AppError("Cart not cleared", 400);
+        }   
+    return user.cart;   
 }
