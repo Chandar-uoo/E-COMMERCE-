@@ -13,7 +13,7 @@ adminRouter.get("/products",auth,roleCheck("admin"),catchAsync(adminController.f
 // add products
 adminRouter.post("/add-product",auth,roleCheck("admin"),catchAsync(adminController.addProduct));
 // edit products
-adminRouter.patch("/update-product/:id",auth,roleCheck("admin"),catchAsync(adminController.updateProduct))
+adminRouter.patch("/update-product",auth,roleCheck("admin"),catchAsync(adminController.updateProduct))
 // delete product 
 adminRouter.delete("/delete-product/:id",auth,roleCheck("admin"),catchAsync(adminController.deleteProduct));
 // fetch order
@@ -25,4 +25,4 @@ adminRouter.get("/orders-to-fullfill",auth,roleCheck("admin"),catchAsync(adminCo
 // updateOrderStatus
 adminRouter.patch("/update-Order-Status/:id",auth,catchAsync(adminController.updateOrderStatus));
 
-module.exports = {adminRouter};
+module.exports = {adminRouter}; 
