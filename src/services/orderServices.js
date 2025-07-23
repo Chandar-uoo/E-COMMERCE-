@@ -12,11 +12,12 @@ exports.readOrderService = async (req, res) => {
     // find orders that has been delivered ,shipped
     const filter = {
         $and: [
+            { userId: user._id },
             { paymentStatus: "paid" },
             { orderStatus: { $in: ["delivered", "shipped", "processing"] } }
-        ]
+        ],
     }
-    const data = await orderModel.find(filter).populate({ path: "productId", select: "ProductName price img category description" }).limit(10);
+    const data = await orderModel.find(filter).populate({ path: "items.productId", select: "ProductName price img category description" }).limit(10);
     return data;
 }
 exports.orderMakingService = async (req, res) => {
@@ -26,7 +27,7 @@ exports.orderMakingService = async (req, res) => {
         throw new AppError("Unauthorized", 401);
     }
     const { itemsFromClient } = req.body;
-    if (itemsFromClient && itemsFromClient.length === 0) {
+    if (!itemsFromClient && itemsFromClient.length === 0) {
         throw new AppError("No items provided", 400);
     }
     const validItems = [];
