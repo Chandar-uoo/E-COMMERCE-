@@ -37,7 +37,8 @@ exports.login = async (req, res) => {
             gender: emailExist.gender,
             image: emailExist.image,
             phoneNo: emailExist.phoneNo,
-            cart: emailExist.cart
+            cart: emailExist.cart,
+            role:emailExist.role
         },
         accessToken
     })
