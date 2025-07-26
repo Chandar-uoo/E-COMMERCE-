@@ -26,7 +26,7 @@ exports.orderMakingService = async (req, res) => {
     if (!user) {
         throw new AppError("Unauthorized", 401);
     }
-    const { itemsFromClient } = req.body;
+    const { itemsFromClient,totalPrice } = req.body;
     if (!itemsFromClient && itemsFromClient.length === 0) {
         throw new AppError("No items provided", 400);
     }
@@ -53,9 +53,13 @@ exports.orderMakingService = async (req, res) => {
             quantity: quantity || 1,
         });
     }
+    if(totalPrice <= 0  && !isNaN(totalPrice)){
+        throw new AppError("Invalid total price", 400);         
+     }
     const newOrder = await orderModel.create({
         userId: user._id,
         items: validItems,
+        totalPrice: totalPrice,
         address: user.address,
         paymentStatus: "unpaid",
         orderStatus: "processing",
