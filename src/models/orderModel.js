@@ -20,6 +20,11 @@ const orderModel = new mongoose.Schema({
             },
         }
     ],
+    totalPrice: {
+        type: Number,
+        required: true,
+        min: 0
+    },
     address: {
         type: String,
         required: true,
