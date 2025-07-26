@@ -21,8 +21,6 @@ adminRouter.get("/orders",auth,roleCheck("admin"),catchAsync(adminController.fet
 // fetch user
 adminRouter.get("/user",auth,roleCheck("admin"),catchAsync(adminController.fetchUser));
 //fetch order = paid & paymentStatus processing
-adminRouter.get("/orders-to-fullfill",auth,roleCheck("admin"),catchAsync(adminController.ordersToFullfill));
-// updateOrderStatus
-adminRouter.patch("/update-Order-Status/:id",auth,catchAsync(adminController.updateOrderStatus));
+adminRouter.get("/orders-to-fullfill",auth,roleCheck("admin"),catchAsync(adminController.filterOrdersStatus));
 
 module.exports = {adminRouter}; 
