@@ -172,15 +172,20 @@ exports.fetchOrdersService = async (req, res) => {
 // update order as shipped
 exports.updateOrderStatusService = async (req, res) => {
   const { id } = req.params;
+  if(!id ||!mongoose.Types.ObjectId.isValid(id) ){
+     throw new AppError("Bad Request", 400);
+  }
   // checking is the payment is paid for the product
   const order = await orderModel.findById(id);
-  const status = order.paymentStatus === "paid" ? true : false;
-  if (!status) {
-    return res.status(409).json({
-      success: false,
-      message: "payment has not been done for the product",
-    });
+
+  if(!order){
+    throw new AppError("Request order updation is not available on system", 404);
   }
+
+  if (order.paymentStatus !== "paid") {
+  throw new AppError("Payment has not been completed for this product", 409);
+}
+
   order.orderStatus = "shipped";
   await order.save();
   return order;
