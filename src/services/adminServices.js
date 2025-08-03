@@ -3,6 +3,7 @@ const userModel = require("../models/user");
 const orderModel = require("../models/orderModel");
 const { default: mongoose } = require("mongoose");
 const AppError = require("../utils/AppError");
+
 exports.fetchProductService = async (req, res) => {
   const { fetch } = req.query;
   const page = Math.max(1, Number(req.query.page) || 1);
@@ -41,15 +42,12 @@ exports.addProductService = async (req, res) => {
     !stock ||
     !rating
   ) {
-    return res.status(400).json({
-      sucsess: false,
-      message: "please enter all details",
-    });
+    throw new AppError("missing details", 400);
   }
 
   const existingProduct = await productModel.findOne({ ProductName });
   if (existingProduct) {
-    throw new AppError("product is already available", 401);
+    throw new AppError("product is already available", 409);
   }
 
   const newProduct = await productModel.create({
@@ -102,7 +100,7 @@ exports.updateProductService = async (req, res) => {
 // delete product
 exports.deleteProductSevice = async (req, res) => {
   const { id } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(id)) {
+  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
     throw new AppError("Bad Request", 400);
   }
 
@@ -191,4 +189,3 @@ exports.updateOrderStatusService = async (req, res) => {
   return order;
 };
 
-22
