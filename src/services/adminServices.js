@@ -9,7 +9,7 @@ exports.fetchProductService = async (req, res) => {
   const limit = Math.min(100, Math.max(Number(req.query.limt) || 10));
   const skip = (page - 1) * limit;
 
-  if (fetch.trim().length === 0) {
+  if ( !fetch || fetch.trim().length === 0) {
     const products = await productModel.find().limit(limit).skip(skip);
     const total = await productModel.countDocuments();
     return { products, total, limit, page };
