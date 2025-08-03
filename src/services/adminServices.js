@@ -68,7 +68,7 @@ exports.addProductService = async (req, res) => {
 exports.updateProductService = async (req, res) => {
   const { id, updateFields } = req.body;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
+  if ( !id || !mongoose.Types.ObjectId.isValid(id)) {
     throw new AppError("Bad Request", 400);
   }
   const product = await productModel.findById(id);
@@ -120,7 +120,10 @@ exports.fetchUserService = async (req, res) => {
   const limit = Math.min(100, Math.max(Number(req.query.limt) || 10));
   const skip = (page - 1) * limit;
   const { fetchUser } = req.query;
-  if (fetchUser.trim().length !== 0) {
+   if (!fetchUser) {
+    throw new AppError("fetchUser is required", 400);
+  }
+  if ( !fetchUser || fetchUser.trim().length !== 0) {
     const filterQuery = {
       name: { $regex: fetchUser, $options: "i" },
     };
@@ -174,3 +177,5 @@ exports.updateOrderStatusService = async (req, res) => {
   await order.save();
   return order;
 };
+
+22
