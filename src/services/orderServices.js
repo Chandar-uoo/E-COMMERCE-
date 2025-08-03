@@ -27,7 +27,7 @@ exports.orderMakingService = async (req, res) => {
         throw new AppError("Unauthorized", 401);
     }
     const { itemsFromClient,totalPrice } = req.body;
-    if (!itemsFromClient && itemsFromClient.length === 0) {
+    if (!itemsFromClient || itemsFromClient.length === 0) {
         throw new AppError("No items provided", 400);
     }
       if (!totalPrice || totalPrice <= 0) {
@@ -47,7 +47,7 @@ exports.orderMakingService = async (req, res) => {
             throw new AppError(`Product not found: ${productId}`, 404);
         }
 
-        if (quantity !== undefined && typeof quantity !== "number") {
+        if (quantity !== undefined || typeof quantity !== "number") {
             throw new AppError("Invalid quantity type", 400);
         }
 
@@ -56,7 +56,7 @@ exports.orderMakingService = async (req, res) => {
             quantity: quantity || 1,
         });
     }
-    if(totalPrice <= 0  && !isNaN(totalPrice)){
+    if(totalPrice <= 0  || !isNaN(totalPrice)){
         throw new AppError("Invalid total price", 400);         
      }
     const newOrder = await orderModel.create({
@@ -73,17 +73,25 @@ exports.orderMakingService = async (req, res) => {
 
 exports.orderPaymentService = async (req, res) => {
     const { payMethod, orderId } = req.body;
+
     const allowedwaysPayment = ["cod", "netPay"];
-    if (!allowedwaysPayment.includes(payMethod)) {
-        throw new AppError("Invalid payment method", 400);
+    if (!payMethod || !allowedwaysPayment.includes(payMethod)) {
+        throw new AppError("Invalid payment method", 400); // Fixed
     }
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+
+    if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
         throw new AppError("Invalid Order ID", 400);
     }
+
     const order = await orderModel.findByIdAndUpdate(orderId, {
         paymentStatus: "paid",
         payMethod: payMethod,
     }, { new: true });
 
+    if (!order) {
+        throw new AppError("Order not found", 404);
+    }
+
     return order;
-}
+};
+
