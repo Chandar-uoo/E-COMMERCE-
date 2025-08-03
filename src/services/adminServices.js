@@ -142,12 +142,20 @@ exports.fetchOrdersService = async (req, res) => {
   const skip = (page - 1) * limit;
   const { orderStatus } = req.query;
   if (!orderStatus) {
-    throw new AppError("orderStatus is required", 400);
+    throw new AppError("Bad request", 400);
   }
   const filter = {};
-  if (orderStatus !== "all") {
+
+  const allowedOrderStatus = ["cancelled", "processing", "delivered", "shipped", "all"];
+
+  if(!allowedOrderStatus.includes(orderStatus)){
+    throw new AppError("invalid request", 400);
+  }
+
+  if (orderStatus !== "all") { 
     filter.orderStatus = orderStatus;
   }
+
   const orders = await orderModel
     .find(filter)
     .populate({
