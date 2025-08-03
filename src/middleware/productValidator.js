@@ -1,4 +1,8 @@
+const AppError = require("../utils/AppError")
 const validateProductInput = (req, res, next) => {
+  if(!req.body.updateFields){
+     throw new AppError("req doesn`t have a body", 400);
+  }
   const { ProductName, category, description, price, img, stock, rating } = req.body.updateFields;
 
   if (
