@@ -30,6 +30,9 @@ exports.orderMakingService = async (req, res) => {
     if (!itemsFromClient && itemsFromClient.length === 0) {
         throw new AppError("No items provided", 400);
     }
+      if (!totalPrice || totalPrice <= 0) {
+        throw new AppError("inavlid totalPrice", 400);
+    }
     const validItems = [];
 
     for (const item of itemsFromClient) {
