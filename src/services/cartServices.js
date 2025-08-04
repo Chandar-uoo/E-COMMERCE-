@@ -11,12 +11,12 @@ exports.addToCartService = async (req, res) => {
         throw new AppError("Unauthorized", 401);
     }
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if ( !id || !mongoose.Types.ObjectId.isValid(id)) {
         throw new AppError("Bad Request", 400);
     }
     const product = await productModel.findById(id);
     if (!product) {
-        throw new AppError("Bad Request", 400);
+        throw new AppError(" no Product found", 404);
     }
     const findProduct = user.cart.find(item => item.productId.toString() === id.toString());
     if (findProduct) {
@@ -52,13 +52,17 @@ exports.updateCartService = async(req,res)=>{
 
     const {id} = req.params;
     const {quantity} = req.body;
+
+    if ( !id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new AppError("Bad Request", 400);
+    }
     if (!Number.isInteger(quantity)) {
         throw new AppError("Quantity must be an integer", 400);
     }
     const user = req.user;
     const findProduct = user.cart.find(item => item.productId.toString() === id.toString());
     if (!findProduct) {
-        throw new AppError("Invalid details", 400);
+        throw new AppError("product not found", 404);
     }
     findProduct.quantity = quantity;
     await user.save();
@@ -69,12 +73,12 @@ exports.deleteCartServices = async (req,res) => {
     
     const {id} = req.params;
     const user = req.user;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if ( !id || !mongoose.Types.ObjectId.isValid(id)) {
        throw new AppError("Bad Request: Invalid ID", 400);
    }
      const product = await productModel.findById(id);
      if (!product) {
-       throw new AppError("Product not found", 400);
+       throw new AppError("Product not found", 404);
    }
      user.cart = user.cart.filter(item => item.productId.toString() !== id.toString());
 
