@@ -1,28 +1,13 @@
-const express = require("express");
-const productModel = require("../models/productModel");
-const { default: mongoose } = require("mongoose");
-const validator = require("validator");
-const AppError = require("../utils/AppError");
+
 
 const cartServices = require("../services/cartServices");
 
 exports.addToCart = async (req, res) => {
-    const result = await cartServices.addToCartService(req, res);
-    if (result.handled) {
-        return res.status(200).json({
-            success:true,
-            message: "sucessfully item quantity updated",
-            result: {
-                _id: result.data,
-            }
-        })
-    };
-    const { newItem, user } = result;
-
+    const data = await cartServices.addToCartService(req, res);
     res.status(200).json({
         success: true,
         message: "successfully item added to cart",
-        result: user.cart[newItem - 1]
+        result: data
     });
 
 }
@@ -39,29 +24,29 @@ exports.readCart = async (req, res) => {
 }
 exports.updateCart = async (req, res) => {
 
-    const findProduct = await cartServices.updateCartService(req, res);
+    const data = await cartServices.updateCartService(req, res);
 
     res.status(200).json({
         success: true,
         message: "sucessful",
-        data: findProduct,
+        data: data,
     })
 
 }
 exports.deleteCart = async (req, res) => {
-    const product = await cartServices.deleteCartServices(req, res);
+    const data = await cartServices.deleteCartServices(req, res);
 
     res.status(200).json({
         sucess: true,
         message: "sucess",
-        result: product._id
+        result:data
     })
 }
 exports.clearCart = async (req, res) => {
-    const cart = await cartServices.clearCartService(req, res);
+    const data = await cartServices.clearCartService(req, res);
     res.status(200).json({
         success: true,
         message: "cart cleared",
-        result: cart
+        result: data
     })
 }
