@@ -17,7 +17,7 @@ exports.readOrderService = async (req, res) => {
             { orderStatus: { $in: ["delivered", "shipped", "processing"] } }
         ],
     }
-    const data = await orderModel.find(filter).populate({ path: "items.productId", select: "ProductName price img category description" }).limit(10);
+    const data = await orderModel.find(filter).populate({ path: "items.productId", select: "title price thumbnail category description" }).limit(10).lean();
     return data;
 }
 exports.orderMakingService = async (req, res) => {
@@ -47,7 +47,7 @@ exports.orderMakingService = async (req, res) => {
             throw new AppError(`Product not found: ${productId}`, 404);
         }
 
-        if (quantity !== undefined || typeof quantity !== "number") {
+        if (quantity === undefined || typeof quantity !== "number") {
             throw new AppError("Invalid quantity type", 400);
         }
 
@@ -56,9 +56,10 @@ exports.orderMakingService = async (req, res) => {
             quantity: quantity || 1,
         });
     }
-    if(totalPrice <= 0  || !isNaN(totalPrice)){
-        throw new AppError("Invalid total price", 400);         
-     }
+  if (totalPrice <= 0 || isNaN(totalPrice)) {
+    throw new AppError("Invalid total price", 400);         
+}
+
     const newOrder = await orderModel.create({
         userId: user._id,
         items: validItems,
