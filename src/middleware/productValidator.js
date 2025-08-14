@@ -1,26 +1,67 @@
-const AppError = require("../utils/AppError")
+const AppError = require("../utils/AppError");
+
 const validateProductInput = (req, res, next) => {
-  if(!req.body.updateFields){
-     throw new AppError("req doesn`t have a body", 400);
+  if (!req.body.updateFields) {
+    throw new AppError("Request body must contain updateFields", 400);
   }
-  const { ProductName, category, description, price, img, stock, rating } = req.body.updateFields;
+
+  const {
+    title,
+    category,
+    description,
+    brand,
+    price,
+    stock,
+    images,
+    thumbnail,
+    weight,
+    warrantyInformation,
+    shippingInformation,
+    returnPolicy,
+    availabilityStatus,
+    tags,
+    dimensions
+  } = req.body.updateFields;
+
+  // Helper for string validation
+  const isNonEmptyString = (val) =>
+    typeof val === "string" && val.trim().length > 0;
+
+  // Helper for positive number
+  const isPositiveNumber = (val) =>
+    typeof val === "number" && !isNaN(val) && val > 0;
+
+  // Helper for non-negative integer
+  const isNonNegativeInteger = (val) =>
+    Number.isInteger(val) && val >= 0;
 
   if (
-    !ProductName || typeof ProductName !== 'string' || ProductName.trim().length === 0 ||
-    !category || typeof category !== 'string' || category.trim().length === 0 ||
-    !description || typeof description !== 'string' || description.trim().length === 0 ||
-    price === undefined || typeof price !== 'number' || price <= 0 ||
-    !img || typeof img !== 'string' || img.trim().length === 0 ||
-    stock === undefined || typeof stock !== 'number' || stock < 0 ||
-    rating === undefined || typeof rating !== 'number' || rating < 0 || rating > 5
+    !isNonEmptyString(title) ||
+    !isNonEmptyString(category) ||
+    !isNonEmptyString(description) ||
+    !isNonEmptyString(brand) ||
+    !isPositiveNumber(price) ||
+    !isNonNegativeInteger(stock) ||
+    !Array.isArray(images) || images.length === 0 || !images.every(isNonEmptyString) ||
+    !isNonEmptyString(thumbnail) ||
+    !isPositiveNumber(weight) ||
+    !isNonEmptyString(warrantyInformation) ||
+    !isNonEmptyString(shippingInformation) ||
+    !isNonEmptyString(returnPolicy) ||
+    !isNonEmptyString(availabilityStatus) ||
+    !Array.isArray(tags) || tags.length === 0 || !tags.every(isNonEmptyString) ||
+    !dimensions ||
+      !isPositiveNumber(dimensions.width) ||
+      !isPositiveNumber(dimensions.height) ||
+      !isPositiveNumber(dimensions.depth)
   ) {
     return res.status(400).json({
       success: false,
-      message:
-        "Invalid or missing details.",
+      message: "Invalid or missing product details.",
     });
   }
 
-  next(); // continue to controller
+  next();
 };
-module.exports= {validateProductInput}
+
+module.exports = { validateProductInput };
