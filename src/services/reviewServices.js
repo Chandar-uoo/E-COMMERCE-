@@ -6,9 +6,10 @@ const productModel = require("../models/productModel")
 
 exports.createReviewService = async (req,res) => {
     const {comment,rating} =  req.body;
-    const {productId} = req.params;
+    const {id} = req.params;
+    
     const user =  req.user;
-    if(!comment || !rating ||!productId || !user){
+    if(!comment || !rating ||!id || !user){
         throw new AppError ("BAD_REQUEST",400)
     };
     // validate string  & rating
@@ -20,21 +21,21 @@ if (typeof rating !== "number" || rating < 1 || rating > 5) {
   throw new AppError("Invalid rating", 400);
 }
 
-    const isProduct =  await productModel.exists({_id:productId});
+    const isProduct =  await productModel.exists({_id:id});
     if(!isProduct){
          throw new AppError ("NO PRODUCT FOUND",404)
     }
     // checking user already review this product
     const isExisting =  await reviewModel.findOne({
         user:user._id,
-        product:productId
+        product:id
     });
     if(isExisting){
          throw new AppError ("Already user review this product",400)
     }
     const newReview =  await reviewModel.create({
         user:user._id,
-        product:productId,
+        product:id,
         comment,
         rating
     });
