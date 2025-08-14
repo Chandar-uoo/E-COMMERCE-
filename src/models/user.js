@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     required: true,
     validate: {
-      validator: validator.isMobilePhone,
+     validator: (value) => validator.isMobilePhone(value, "en-IN"),
       message: "phone number is not valid"
     }
   },
