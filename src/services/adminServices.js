@@ -3,14 +3,14 @@ const userModel = require("../models/user");
 const orderModel = require("../models/orderModel");
 const { default: mongoose } = require("mongoose");
 const AppError = require("../utils/AppError");
-
+const normalizeProductData = require("../utils/normaliseProductData");
 exports.fetchProductService = async (req, res) => {
   const { fetch } = req.query;
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(100, Math.max(Number(req.query.limt) || 10));
   const skip = (page - 1) * limit;
 
-  if ( !fetch || fetch.trim().length === 0) {
+  if (!fetch || fetch.trim().length === 0) {
     const products = await productModel.find().limit(limit).skip(skip);
     const total = await productModel.countDocuments();
     return { products, total, limit, page };
@@ -27,76 +27,48 @@ exports.fetchProductService = async (req, res) => {
   return { products, total, limit, page };
 };
 
-// add product
-
+// Add product
 exports.addProductService = async (req, res) => {
-  const { ProductName, category, description, price, img, stock, rating } =
-    req.body.updateFields;
+  const productData = normalizeProductData(req.body.updateFields);
 
-  if (
-    !ProductName ||
-    !category ||
-    !description ||
-    !price ||
-    !img ||
-    !stock ||
-    !rating
-  ) {
-    throw new AppError("missing details", 400);
-  }
-
-  const existingProduct = await productModel.findOne({ ProductName });
-  if (existingProduct) {
-    throw new AppError("product is already available", 409);
-  }
-
-  const newProduct = await productModel.create({
-    ProductName,
-    category,
-    description,
-    price,
-    img,
-    stock,
-    rating,
+  const existingProduct = await productModel.findOne({
+    title: productData.title,
   });
+  if (existingProduct) {
+    throw new AppError("Product is already available", 409);
+  }
 
+  const newProduct = await productModel.create(productData);
   return newProduct;
 };
-// update product
+
+// Update product
 exports.updateProductService = async (req, res) => {
   const { id, updateFields } = req.body;
 
-  if ( !id || !mongoose.Types.ObjectId.isValid(id)) {
+  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
     throw new AppError("Bad Request", 400);
   }
+
   const product = await productModel.findById(id);
   if (!product) {
-    throw new AppError("product not found", 404);
+    throw new AppError("Product not found", 404);
   }
 
-  const allowedFields = [
-    "ProductName",
-    "category",
-    "description",
-    "price",
-    "img",
-    "stock",
-    "rating",
-  ];
-  const updates = {};
-  for (let key in updateFields) {
-    if (allowedFields.includes(key)) {
-      updates[key] = updateFields[key];
+  const normalizedUpdates = normalizeProductData(updateFields);
+
+  const updatedProduct = await productModel.findByIdAndUpdate(
+    id,
+    normalizedUpdates,
+    {
+      new: true,
+      runValidators: true,
     }
-  }
+  );
 
-  const updateProduct = await productModel.findByIdAndUpdate(id, updates, {
-    new: true,
-    runValidators: true,
-  });
-
-  return updateProduct;
+  return updatedProduct;
 };
+
 // delete product
 exports.deleteProductSevice = async (req, res) => {
   const { id } = req.params;
@@ -118,10 +90,8 @@ exports.fetchUserService = async (req, res) => {
   const limit = Math.min(100, Math.max(Number(req.query.limt) || 10));
   const skip = (page - 1) * limit;
   const { fetchUser } = req.query;
-   if (!fetchUser) {
-    throw new AppError("fetchUser is required", 400);
-  }
-  if ( !fetchUser || fetchUser.trim().length !== 0) {
+
+  if (!fetchUser || fetchUser.trim().length !== 0) {
     const filterQuery = {
       name: { $regex: fetchUser, $options: "i" },
     };
@@ -144,13 +114,19 @@ exports.fetchOrdersService = async (req, res) => {
   }
   const filter = {};
 
-  const allowedOrderStatus = ["cancelled", "processing", "delivered", "shipped", "all"];
+  const allowedOrderStatus = [
+    "cancelled",
+    "processing",
+    "delivered",
+    "shipped",
+    "all",
+  ];
 
-  if(!allowedOrderStatus.includes(orderStatus)){
+  if (!allowedOrderStatus.includes(orderStatus)) {
     throw new AppError("invalid request", 400);
   }
 
-  if (orderStatus !== "all") { 
+  if (orderStatus !== "all") {
     filter.orderStatus = orderStatus;
   }
 
@@ -158,7 +134,11 @@ exports.fetchOrdersService = async (req, res) => {
     .find(filter)
     .populate({
       path: "items.productId",
-      select: "ProductName price img category description",
+      select: "title price thumbnail category description",
+    })
+    .populate({
+      path: "userId",
+      select: "name",
     })
     .limit(limit)
     .skip(skip);
@@ -170,22 +150,24 @@ exports.fetchOrdersService = async (req, res) => {
 // update order as shipped
 exports.updateOrderStatusService = async (req, res) => {
   const { id } = req.params;
-  if(!id ||!mongoose.Types.ObjectId.isValid(id) ){
-     throw new AppError("Bad Request", 400);
+  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    throw new AppError("Bad Request", 400);
   }
   // checking is the payment is paid for the product
   const order = await orderModel.findById(id);
 
-  if(!order){
-    throw new AppError("Request order updation is not available on system", 404);
+  if (!order) {
+    throw new AppError(
+      "Request order updation is not available on system",
+      404
+    );
   }
 
   if (order.paymentStatus !== "paid") {
-  throw new AppError("Payment has not been completed for this product", 409);
-}
+    throw new AppError("Payment has not been completed for this product", 409);
+  }
 
   order.orderStatus = "shipped";
   await order.save();
   return order;
 };
-
