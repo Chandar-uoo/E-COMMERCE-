@@ -39,7 +39,7 @@ exports.addToCartService = async (req, res) => {
       totalQuantity: quantity,
       totalPrice: product.price * quantity,
     });
-     await cart.populate("items.product","ProductName price img category description ");
+     await cart.populate("items.product","title price thumbnail category description ");
     return newCart;
     }
     
@@ -51,8 +51,9 @@ exports.addToCartService = async (req, res) => {
 
   if (itemIndex > -1) {
     // CASE 2a: Product already exists in cart
+    const currQuantity =  cart.items[itemIndex].quantity;
     cart.items[itemIndex].quantity += quantity;
-    cart.totalQuantity += quantity;
+      cart.totalQuantity +=  quantity;
 const itemTotal = product.price * quantity;
 cart.totalPrice += parseFloat(itemTotal.toFixed(2));
   } else {
@@ -68,7 +69,7 @@ cart.totalPrice += parseFloat(itemTotal.toFixed(2));
   }
   cart.updatedAt = new Date();
   await cart.save();
-   await cart.populate("items.product","ProductName price img category description ");
+   await cart.populate("items.product","title price thumbnail category description ");
   return cart;
 }
 
@@ -78,7 +79,7 @@ exports.readCartService = async (req, res) => {
         if (!user) {
             throw new AppError("Unauthorized", 403);
         }
-        const cart  = await cartModel.findOne({user:user._id}).populate("items.product","ProductName price img category description ").lean()
+        const cart  = await cartModel.findOne({user:user._id}).populate("items.product","title price thumbnail category description ").lean()
         return cart;
 }
 
@@ -108,8 +109,15 @@ exports.updateCartService = async(req,res)=>{
 
   if (itemIndex > -1) {
     // CASE 2a: Product already exists in cart
-    cart.items[itemIndex].quantity += quantity;
-    cart.totalQuantity += quantity;
+     const currQuantity =  cart.items[itemIndex].quantity;
+    cart.items[itemIndex].quantity = quantity;
+     if(quantity < currQuantity){
+      
+      cart.totalQuantity -= currQuantity - quantity;
+     }
+     else{
+      cart.totalQuantity +=  quantity - currQuantity;
+     }
     const itemTotal = product.price * quantity;
 cart.totalPrice += parseFloat(itemTotal.toFixed(2));
     await cart.save();
@@ -118,7 +126,7 @@ cart.totalPrice += parseFloat(itemTotal.toFixed(2));
 }
 
 exports.deleteCartServices = async (req,res) => {
-    
+  
     const {productId} = req.body;
     const user = req.user;
     if ( !productId || !mongoose.Types.ObjectId.isValid(productId)) {
