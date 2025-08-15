@@ -95,11 +95,11 @@ exports.fetchUserService = async (req, res) => {
     const filterQuery = {
       name: { $regex: fetchUser, $options: "i" },
     };
-    const users = await userModel.find(filterQuery).limit(limit).skip(skip);
+    const users = await userModel.find(filterQuery).select("name email DOB address phoneNo image").limit(limit).skip(skip);
     const total = await userModel.countDocuments();
     return { users, total, limit, page };
   }
-  const users = await userModel.find({}).limit(limit).skip(skip);
+  const users = await userModel.find({}).select("name email DOB address phoneNo image").limit(limit).skip(skip);
   const total = await userModel.countDocuments();
   return { users, total, limit, page };
 };
