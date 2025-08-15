@@ -17,7 +17,6 @@ exports.orderMaking = async (req, res) => {
         success: true,
         message:"order created",
         result: order,
-        orderId: order._id,
     })
 }
 exports.orderPayment = async (req, res) => {
