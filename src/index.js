@@ -23,6 +23,8 @@ const limiter =  rateLimit({
   max:500,
   message:"too many requests please try later on"
 })
+app.set('trust proxy', 1);
+
 app.use("/api",limiter)
 // corn
 
