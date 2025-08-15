@@ -18,12 +18,13 @@ require('dotenv').config();
 // helmet
 app.use(helmet());
 // rate limit
+app.set('trust proxy', 1);
 const limiter =  rateLimit({
   windowMs:15*60*1000,
-  max:500,
+  max:1000,
   message:"too many requests please try later on"
 })
-app.set('trust proxy', 1);
+
 
 app.use("/api",limiter)
 // corn
