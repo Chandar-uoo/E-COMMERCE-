@@ -78,11 +78,12 @@ exports.loginService = async (req, res) => {
 
 // logout
 exports.logoutService = (req, res) => {
-    res.clearCookie("refreshToken", {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: false,
-    });
+ res.clearCookie("refreshToken", {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+  path: "/"
+});
 }
 
 exports.accessTokenRenwal = async (req, res) => {

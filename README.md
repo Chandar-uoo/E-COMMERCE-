@@ -1,9 +1,6 @@
-Absolutely! Here's a **clean, professional, and fresher-friendly `README.md` for your backend project**. It's designed to explain everything clearly — APIs, setup, environment, folder structure, and more.
 
----
 
-```markdown
-# 🛠️ E-Commerce Backend (Node.js + Express)
+# 🛠️  Retailx E-Commerce Backend (Node.js + Express)
 
 This is the backend for the E-Commerce web application. It provides RESTful APIs for user authentication, product management, cart operations, order handling, and admin functionalities.
 
