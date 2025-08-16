@@ -127,10 +127,10 @@ Use Postman or Thunder Client to explore the APIs.
 
 * [ ] 🔄 Stripe or Razorpay Payment Integration
 * [ ] 📊 Admin Dashboard Charts (orders, revenue, users)
-* [ ] 📚 API Rate Limiting per user
 * [ ] 📂 Product Filters & Categories
 * [ ] 📦 Inventory Management
 * [ ] 🎁 Discount/Coupon System
+* [ ] 🔐 Add email verification on sign up , password update
 
 ---
 
