@@ -79,7 +79,7 @@ exports.readCartService = async (req, res) => {
         if (!user) {
             throw new AppError("Unauthorized", 403);
         }
-        const cart  = await cartModel.findOne({user:user._id}).populate("items.product","title price thumbnail category description ").lean()
+        const cart  = await cartModel.findOne({user:user._id}).populate("items.product","title price thumbnail category description ").sort({ createdAt: -1 }).lean();
         return cart;
 }
 
