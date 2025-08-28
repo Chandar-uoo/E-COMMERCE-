@@ -1,4 +1,5 @@
  const normalizeProductData = (fields) => {
+  const allowedStatus =   ["In Stock", "Out of Stock", "Low Stock", "Discontinued"]; 
   return {
     title: typeof fields.title === "string" ? fields.title.trim() : "",
     category: typeof fields.category === "string" ? fields.category.trim() : "",
@@ -22,7 +23,7 @@
     returnPolicy: typeof fields.returnPolicy === "string"
       ? fields.returnPolicy.trim()
       : "",
-    availabilityStatus: typeof fields.availabilityStatus === "string"
+    availabilityStatus: typeof fields.availabilityStatus === "string" && allowedStatus.includes(fields.availabilityStatus.trim())
       ? fields.availabilityStatus.trim()
       : "",
     tags: Array.isArray(fields.tags)
@@ -35,6 +36,7 @@
       height: fields.dimensions?.height !== undefined ? parseFloat(fields.dimensions.height) : 0,
       depth: fields.dimensions?.depth !== undefined ? parseFloat(fields.dimensions.depth) : 0,
     },
+    isDeleted:typeof fields.isDeleted === "boolean" ?fields.isDeleted : false
   };
 };
 module.exports = normalizeProductData;
