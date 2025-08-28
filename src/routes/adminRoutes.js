@@ -12,6 +12,8 @@ adminRouter.get("/products",auth,roleCheck("admin"),catchAsync(adminController.f
 
 // add products
 adminRouter.post("/add-product",auth,roleCheck("admin"),validateProductInput,catchAsync(adminController.addProduct));
+// filter product
+adminRouter.get("/filter",auth,roleCheck("admin"),catchAsync(adminController.filterProduct))
 // edit products
 adminRouter.patch("/update-product",auth,roleCheck("admin"),validateProductInput,catchAsync(adminController.updateProduct))
 // delete product 
