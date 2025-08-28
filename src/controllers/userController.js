@@ -13,7 +13,7 @@ exports.userCheck = (req, res) => {
             gender: user.gender,
             image: user.image,
             phoneNo: user.phoneNo,
-            cart: user.cart
+            role:user.role
         }
     })
 }
