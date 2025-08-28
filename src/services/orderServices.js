@@ -17,7 +17,7 @@ exports.readOrderService = async (req, res) => {
             { orderStatus: { $in: ["delivered", "shipped", "processing"] } }
         ],
     }
-    const data = await orderModel.find(filter).populate({ path: "items.productId", select: "title price thumbnail category description" }).limit(10).lean();
+    const data = await orderModel.find(filter).populate({ path: "items.productId", select: "title price thumbnail category description" }).sort({ createdAt: -1 }).lean();
     return data;
 }
 exports.orderMakingService = async (req, res) => {
