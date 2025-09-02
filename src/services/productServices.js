@@ -23,7 +23,12 @@ exports.getProductbyFilterService = async (req, res) => {
   if (category) filter.category = category;
   if (brand) filter.brand = brand;
   if (tags && tags.length > 0) filter.tags = { $in: tags.split(",") };
-  if (stock) filter.stock = stock;
+  const  allowedStocks =  ["In Stock", "Out of Stock", "Low Stock", "Discontinued"];
+  if( stock && !allowedStocks.includes(stock)) {
+    throw new AppError("Bad Request", 400);
+  }
+  if (stock) filter.availabilityStatus = stock;
+  
 
   // Regex-based partial search on title or brand
   if (search) {

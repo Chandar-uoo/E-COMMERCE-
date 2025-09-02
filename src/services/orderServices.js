@@ -47,7 +47,7 @@ exports.orderMakingService = async (req, res) => {
             throw new AppError(`Product not found: ${productId}`, 404);
         }
 
-        if (quantity === undefined || typeof quantity !== "number" || quantity <= 0) {
+        if (quantity === undefined || typeof quantity !== "number" || quantity <= 0 ||  quantity > product.stock ) {
             throw new AppError("Invalid quantity", 400);
         }
 
