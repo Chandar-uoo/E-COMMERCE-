@@ -8,12 +8,14 @@ const normalizeProductData = require("../utils/normaliseProductData");
 exports.fetchProductService = async (req, res) => {
   const { fetch } = req.query;
   const page = Math.max(1, Number(req.query.page) || 1);
-  const limit = Math.min(100, Math.max(Number(req.query.limt) || 16));
+  const limit = Math.min(100, Math.max(Number(req.query.limit) || 16));
   const skip = (page - 1) * limit;
 
   if (!fetch || fetch.trim().length === 0) {
-    const products = await productModel.find({}).limit(limit).skip(skip);
-    const total = await productModel.countDocuments();
+    const [products, total] = await Promise.all([
+       productModel.find({}).limit(limit).skip(skip),
+       productModel.countDocuments(),
+    ]);
     return { products, total, limit, page };
   }
 
@@ -23,18 +25,16 @@ exports.fetchProductService = async (req, res) => {
       { category: { $regex: fetch, $options: "i" } },
     ],
   };
-  const products = await productModel
-    .find(filterQuery)
-    .limit(limit)
-    .skip(skip)
-    .lean();
-  const total = await productModel.countDocuments(filterQuery);
+  const [products, total] =  await Promise.all([
+     productModel.find(filterQuery).limit(limit).skip(skip).lean(),
+     productModel.countDocuments(filterQuery),
+  ]);
   return { products, total, limit, page };
 };
 // filter product
 exports.filterProductSevice = async (req, res) => {
   const page = Math.max(1, Number(req.query.page) || 1);
-  const limit = Math.min(100, Math.max(Number(req.query.limt) || 16));
+  const limit = Math.min(100, Math.max(Number(req.query.limit) || 16));
   const skip = (page - 1) * limit;
   const { availabilityStatus } = req.query;
   if (!availabilityStatus) {
@@ -54,13 +54,11 @@ exports.filterProductSevice = async (req, res) => {
 
   filter.availabilityStatus = availabilityStatus;
 
-  const products = await productModel
-    .find(filter)
-    .limit(limit)
-    .skip(skip)
-    .lean();
+  const [products, total] =  await Promise.all([
+     productModel.find(filter).limit(limit).skip(skip).lean(),
 
-  const total = await productModel.find(filter).countDocuments();
+     productModel.find(filter).countDocuments(),
+  ]);
 
   return { products, total, limit, page };
 };
@@ -120,13 +118,15 @@ exports.deleteProductSevice = async (req, res) => {
 
   const deleteProduct = await productModel.findByIdAndUpdate(id, {
     isDeleted: true,
+    availabilityStatus:"Discontinued"
+
   });
   return deleteProduct;
 };
 // fetch user
 exports.fetchUserService = async (req, res) => {
   const page = Math.max(1, Number(req.query.page) || 1);
-  const limit = Math.min(100, Math.max(Number(req.query.limt) || 16));
+  const limit = Math.min(100, Math.max(Number(req.query.limit) || 16));
   const skip = (page - 1) * limit;
   const { fetchUser } = req.query;
 
@@ -134,27 +134,32 @@ exports.fetchUserService = async (req, res) => {
     const filterQuery = {
       name: { $regex: fetchUser, $options: "i" },
     };
-    const users = await userModel
-      .find(filterQuery)
-      .select("name email DOB address phoneNo image")
-      .limit(limit)
-      .skip(skip);
-    const total = await userModel.find(filterQuery).countDocuments();
+    const [users, total] = await Promise.all([
+       userModel
+        .find(filterQuery)
+        .select("name email DOB address phoneNo image")
+        .limit(limit)
+        .skip(skip),
+       userModel.find(filterQuery).countDocuments(),
+    ]);
     return { users, total, limit, page };
   }
-  const users = await userModel
-    .find({})
-    .select("name email DOB address phoneNo image")
-    .limit(limit)
-    .skip(skip)
-    .lean();
-  const total = await userModel.find({}).countDocuments();
+
+  const [users, total] = await Promise.all([
+     userModel
+      .find({})
+      .select("name email DOB address phoneNo image")
+      .limit(limit)
+      .skip(skip)
+      .lean(),
+     userModel.find({}).countDocuments(),
+  ]);
   return { users, total, limit, page };
 };
 // fetchOrders
 exports.fetchOrdersService = async (req, res) => {
   const page = Math.max(1, Number(req.query.page) || 1);
-  const limit = Math.min(100, Math.max(Number(req.query.limt) || 16));
+  const limit = Math.min(100, Math.max(Number(req.query.limit) || 16));
   const skip = (page - 1) * limit;
   const { orderStatus } = req.query;
   if (!orderStatus) {
@@ -177,22 +182,23 @@ exports.fetchOrdersService = async (req, res) => {
   if (orderStatus !== "all") {
     filter.orderStatus = orderStatus;
   }
+  const [orders, total] = await Promise.all([
+     orderModel
+      .find(filter)
+      .populate({
+        path: "items.productId",
+        select: "title price thumbnail category description",
+      })
+      .populate({
+        path: "userId",
+        select: "name",
+      })
+      .limit(limit)
+      .skip(skip)
+      .lean(),
 
-  const orders = await orderModel
-    .find(filter)
-    .populate({
-      path: "items.productId",
-      select: "title price thumbnail category description",
-    })
-    .populate({
-      path: "userId",
-      select: "name",
-    })
-    .limit(limit)
-    .skip(skip)
-    .lean();
-
-  const total = await orderModel.find(filter).countDocuments();
+     orderModel.find(filter).countDocuments(),
+  ]);
 
   return { orders, total, limit, page };
 };
