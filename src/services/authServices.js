@@ -8,25 +8,22 @@ const AppError = require("../utils/AppError");
 // signup
 exports.signupService = async (req, res) => {
     const { name, email, password, address, image, gender, phoneNo, DOB } = req.body;
-    if (!name || !email || !password || !image || !gender || !phoneNo || !DOB) {
+    if (!name || !email || !password || !gender || !phoneNo || !DOB) {
         throw new AppError("data is missing", 400);
     }
     if (!validator.isEmail(email)) {
-        throw new AppError('Email not  valid', 400);
+        throw new AppError('Email is  not  valid', 400);
     }
     const existing = await userModel.findOne({ email });
     if (existing) {
         throw new AppError("user already present with this email", 409)
     }
-    if (!validator.isURL(image)) {
-        throw new AppError("Url not valid", 400);
-    }
     const existingPhoneNo =  await userModel.findOne({phoneNo});
     if(existingPhoneNo){
         throw new AppError("user already present with this phone", 409)
     }
-    if (!validator.isMobilePhone(phoneNo)) {
-        throw new AppError('phoneNo not valid', 400);
+    if (!validator.isMobilePhone(phoneNo,"en-IN")) {
+        throw new AppError('phone Number not valid', 400);
     }
     const allowedGender = ["male", "female", "other"];
     if (!allowedGender.includes(gender)) {

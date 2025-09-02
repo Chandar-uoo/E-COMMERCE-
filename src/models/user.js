@@ -45,11 +45,11 @@ const userSchema = new mongoose.Schema({
   },
   image: {
     type: String,
-    required: true,
     validate: {
       validator: validator.isURL,
       message: "Url is not valid"
-    }
+    },
+    default:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTA-m4D7gaOaHMGxxheIp_xF_OSzrba6G7MIA&s"
   },
   gender: {
     type: String,
