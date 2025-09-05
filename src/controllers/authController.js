@@ -22,7 +22,8 @@ exports.signup = async (req, res) => {
         gender: newUser.gender,
         image: newUser.image,
         phoneNo: newUser.phoneNo,
-        cart: newUser.cart,
+        role: newUser.role,
+        isVerified: newUser.isVerified,
       },
       accessToken,
     });
@@ -50,8 +51,8 @@ exports.login = async (req, res) => {
         gender: emailExist.gender,
         image: emailExist.image,
         phoneNo: emailExist.phoneNo,
-        cart: emailExist.cart,
         role: emailExist.role,
+        isVerified: emailExist.isVerified,
       },
       accessToken,
     });
