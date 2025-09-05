@@ -32,7 +32,7 @@ app.use("/api",limiter)
 startOrderCleaner();
 // cors 
 app.use(cors({
-  origin: 'https://retailx666.netlify.app',
+  origin: 'http://localhost:5173',
   credentials: true
 }));
 app.use(express.json());

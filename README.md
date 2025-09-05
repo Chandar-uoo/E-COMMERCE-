@@ -8,31 +8,38 @@ This is the backend for the E-Commerce web application. It provides RESTful APIs
 
 ## 🚀 Features
 
-- 🔐 **Authentication**
-  - Login, Signup, JWT Access + Refresh Tokens
-  - Role-Based Access Control (User / Admin)
+## 🚀 Features  
 
-- 👤 **User Management**
-  - Profile update, Password change
-  - Admin can view/search all users
+### 🔐 Authentication  
+- Login, Signup, JWT Access + Refresh Tokens  
+- Email verification (OTP on signup)  
+- Role-Based Access Control (User / Admin)  
 
-- 🛍️ **Products**
-  - Admin: Create, Update, Delete Products
-  - All users: View Products
+### 👤 User Management  
+- Profile update, Password change  
+- Admin: View/Search all users  
 
-- 🛒 **Cart**
-  - Add / Update / Remove Items from Cart
-  - Auto-sync with backend
+### 🛍️ Products  
+- Users: View & Filter Products  
+- Admin: Create, Update, Delete Products  
 
-- 📦 **Orders**
-  - Make Order, Simulated Payment (Cash, NetBanking)
-  - Admin can update order status
+### 🛒 Cart  
+- Add / Update / Remove Items from Cart  
+- Auto-sync with backend  
 
-- 📊 **Admin Dashboard**
-  - View all users
-  - View all orders
-  - Update order status
-  - Dashboard-ready: room for analytics, stats
+### 📦 Orders  
+- Users: Place Orders, Simulated Payment (Cash / NetBanking)  
+- Email proof sent after payment  
+- Admin: Update order status (Processing → Shipped → Delivered)  
+
+### 📊 Admin Dashboard  
+- Manage Products  
+- Manage Users  
+- Manage Orders  
+- Ready for analytics/stats  
+
+👉 **Admin-only actions**: Add/Update/Delete Product, Fetch All Users, Update Order Status  
+👉 **User actions**: Browse Products, Manage Cart, Place Orders, Make Payments, Verify Email  
 
 ---
 
@@ -123,11 +130,8 @@ Use Postman or Thunder Client to explore the APIs.
 ## 📈 Planned Features
 
 * [ ] 🔄 Stripe or Razorpay Payment Integration
-* [ ] 📊 Admin Dashboard Charts (orders, revenue, users)
-* [ ] 📂 Product Filters & Categories
 * [ ] 📦 Inventory Management
-* [ ] 🎁 Discount/Coupon System
-* [ ] 🔐 Add email verification on sign up , password update
+* [ ] 🔐 Add email verification, password update
 
 ---
 
