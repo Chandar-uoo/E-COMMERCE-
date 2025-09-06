@@ -86,8 +86,8 @@ exports.updateUserPasswordService = async (req, res) => {
 };
 exports.userEmailOtpSendService = async (req, res) => {
   const {email} = req.body;
-  if (!email) {
-    throw new AppError("Bad Request", 400);
+  if (!email || !validator.isEmail(email)) {
+    throw new AppError("invalid email", 400);
   }
   const otp = otpGenrator();
   const subject = "Your OTP Code for Secure Verification";
