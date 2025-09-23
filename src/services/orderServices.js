@@ -3,6 +3,7 @@ const orderModel = require("../models/orderModel");
 const productModel = require("../models/productModel");
 const AppError = require("../utils/AppError");
 const { sendEmail } = require("../utils/email");
+const {orderReceiptTemplate} = require("../utils/emailTemplates");
 
 exports.readOrderService = async (req, res) => {
   const user = req.user;
@@ -118,35 +119,7 @@ exports.orderPaymentService = async (req, res) => {
   if (!order) {
     throw new AppError("Order not found", 404);
   }
-  const subject = `Your payment was successful – Order Receipt ${orderId}`;
-
-  const text = `
-Hello ${user.name},
-
-Thank you for shopping with us!
-
-We have received your payment successfully. Here are the details of your order:
-
-Order ID: ${orderId}
-Payment Method: ${payMethod}
-Payment Status: ${order.paymentStatus}
-Order Status: ${order.orderStatus}
-Shipping Address: ${order.address}
-
-Items Ordered:
-${order.items
-  .map((i) => `- ${i.name} (x${i.quantity}) – $${i.price}`)
-  .join("\n")}
-
-Total Paid: $${order.totalPrice}
-
-You can expect another update once your order is shipped.
-
-If you have any questions, reply to this email and we’ll be happy to help.
-
-Best regards,  
-The RetailX E-Commerce Team
-`;
+const { subject, text } = orderReceiptTemplate(user, order, payMethod);
   await sendEmail({ to: user.email, subject, text });
   return order;
 };

@@ -2,11 +2,13 @@ const AppError = require("../utils/AppError");
 const userModel = require("../models/user");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
-const { isAtleast18 } = require("../utils/validators");
 const { sendEmail } = require("../utils/email");
 const { otpGenrator } = require("../utils/otpGenrator");
 const verificationTokens = require("../models/verificationTokens");
 const jwt = require("jsonwebtoken");
+const { otpVerificationTemplate } = require("../utils/emailTemplates");
+const { userUpdateDetailsValidations } = require("../utils/validatons");
+
 exports.userCheckService = (req, res) => {
   const user = req.user;
   if (!user) {
@@ -14,6 +16,7 @@ exports.userCheckService = (req, res) => {
   }
   return user;
 };
+
 exports.updateUserDetailsService = async (req, res) => {
   const user = req.user;
   if (!user) {
@@ -24,37 +27,15 @@ exports.updateUserDetailsService = async (req, res) => {
   if (!name || !DOB || !image || !phoneNo || !address) {
     throw new AppError("details are not provided", 400);
   }
-  const userName = name.toLowerCase().trim();
-  if (
-    userName.length < 2 ||
-    userName.length > 50 ||
-    !typeof userName === "string" ||
-    !validator.isAlpha(userName, "en-US", { ignore: " " })
-  ) {
-    throw new AppError("invalid name", 400);
-  }
-  if (!isAtleast18(DOB)) {
-    throw new AppError("You must be at least 18 years old", 400);
-  }
-  const existingPhoneNo = await userModel.findOne({ phoneNo });
+  await userUpdateDetailsValidations({
+    user,
+    name,
+    DOB,
+    image,
+    phoneNo,
+    address,
+  });
 
-  if (
-    (existingPhoneNo && !user.phoneNo === phoneNo) ||
-    !validator.isMobilePhone(phoneNo)
-  ) {
-    throw new AppError("invalid phone number", 400);
-  }
-  if (!validator.isURL(image)) {
-    throw new AppError("invalid image URL", 400);
-  }
-  if (
-    !address ||
-    address.length < 10 ||
-    address.length > 100 ||
-    !typeof address === "string"
-  ) {
-    throw new AppError("invalid address", 400);
-  }
   const updateUser = userModel.findByIdAndUpdate(
     user._id,
     {
@@ -68,6 +49,7 @@ exports.updateUserDetailsService = async (req, res) => {
   );
   return updateUser;
 };
+
 exports.updateUserPasswordService = async (req, res) => {
   const user = req.user;
   const { oldPassword, newPassword } = req.body;
@@ -80,30 +62,18 @@ exports.updateUserPasswordService = async (req, res) => {
     throw new AppError("old password is invalid", 401);
   }
   const newHashedPassword = await bcrypt.hash(newPassword, 10);
-  const updatedPassword = await userModel.findByIdAndUpdate(user._id, {
+  await userModel.findByIdAndUpdate(user._id, {
     password: newHashedPassword,
   });
 };
+
 exports.userEmailOtpSendService = async (req, res) => {
-  const {email} = req.body;
+  const { email } = req.body;
   if (!email || !validator.isEmail(email)) {
     throw new AppError("invalid email", 400);
   }
   const otp = otpGenrator();
-  const subject = "Your OTP Code for Secure Verification";
-  const text = `Hello User,
-
-We received a request to verify your email account ${email}.
-Please use the following One-Time Password (OTP) to complete your verification:
-
-Your OTP Code:${otp}
-
-⚠️ This code will expire in 5 minutes.
-If you did not request this, please ignore this email or contact our support team immediately.
-
-Thank you,
-Team Retailx
-`;
+  const { subject, text } = otpVerificationTemplate(user.email, otp);
   await verificationTokens.deleteMany({
     email: email,
     purpose: "EMAIL_VERIFY",
@@ -134,11 +104,10 @@ exports.userEmailVerifyService = async (req, res) => {
   if (!data || data.otp !== otp) {
     throw new AppError("invalid Otp ", 400);
   }
-const emailToken =   jwt.sign(
+  const emailToken = jwt.sign(
     { email, verified: true, purpose: "signup" },
     process.env.JWT_SECRET,
     { expiresIn: "15m" }
   );
-  return {emailToken};
+  return { emailToken };
 };
-

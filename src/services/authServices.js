@@ -1,15 +1,17 @@
-const validator = require("validator");
-const { isAtleast18 } = require("../utils/validators");
 const userModel = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const AppError = require("../utils/AppError");
-
+const { userDetailsValidation } = require("../utils/validatons");
 // signup
 exports.signupService = async (req, res) => {
+
+/* inputs*/
   const token = req.cookies.emailToken;
   const { name, email, password, address, image, gender, phoneNo, DOB } =
     req.body;
+
+/* validatins*/
   if (!name || !email || !password || !gender || !phoneNo || !DOB) {
     throw new AppError("data is missing", 400);
   }
@@ -20,31 +22,14 @@ exports.signupService = async (req, res) => {
   if (!decoded || !decoded.verified) {
     throw new AppError("email not verified ", 400);
   }
-  if (!validator.isEmail(email) || decoded.email !== email) {
-    throw new AppError("Email is  not  valid", 400);
-  }
-  const existing = await userModel.findOne({ email });
-  if (existing) {
-    throw new AppError("user already present with this email", 409);
-  }
-  const existingPhoneNo = await userModel.findOne({ phoneNo });
-  if (existingPhoneNo) {
-    throw new AppError("user already present with this phone", 409);
-  }
-  if (!validator.isMobilePhone(phoneNo, "en-IN")) {
-    throw new AppError("phone Number not valid", 400);
-  }
-  const allowedGender = ["male", "female", "other"];
-  if (!allowedGender.includes(gender)) {
-    throw new AppError("Invalid gender value", 400);
-  }
-  if (!isAtleast18(DOB)) {
-    throw new AppError("Only users aged 18 or above are allowed", 400);
-  }
+  
+  await userDetailsValidation({name,decoded, email, phoneNo, gender, DOB });
 
   const hashedpassword = await bcrypt.hash(password, 10);
   const refreshKey = process.env.REFRESH_TOKEN;
   const accessKey = process.env.ACCESS_TOKEN;
+
+/* user create */
   const newUser = await userModel.create({
     name,
     email,
@@ -54,7 +39,7 @@ exports.signupService = async (req, res) => {
     gender,
     phoneNo,
     password: hashedpassword,
-    isVerified:decoded.verified,
+    isVerified: decoded.verified,
   });
   const refreshToken = jwt.sign({ id: newUser._id }, refreshKey, {
     expiresIn: "5h",
@@ -68,8 +53,11 @@ exports.signupService = async (req, res) => {
 // login
 
 exports.loginService = async (req, res) => {
+  /*input*/
   const { email, password } = req.body;
   const emailExist = await userModel.findOne({ email });
+
+  /*input validations*/
   if (!emailExist) {
     throw new AppError("Invalid email or password", 400);
   }

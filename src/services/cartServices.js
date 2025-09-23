@@ -7,11 +7,14 @@ const cartModel =  require("../models/cartmodel");
 
 exports.addToCartService = async (req, res) => {
 
+  /* inputs*/
+
     const user = req.user;
     if (!req.user) {
         throw new AppError("Unauthorized", 401);
     }
     const { productId,quantity } = req.body;
+
      if(quantity <= 0){
         throw new AppError ("Bad request - quantity must be valid",400)
      }
@@ -44,6 +47,7 @@ exports.addToCartService = async (req, res) => {
     }
     
   // CASE 2: Cart exists
+  
   // Check if product is already in cart
   const itemIndex = cart.items.findIndex(item =>
     item.product.toString() === productId

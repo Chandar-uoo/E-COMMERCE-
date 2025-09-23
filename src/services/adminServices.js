@@ -5,6 +5,9 @@ const { default: mongoose } = require("mongoose");
 const AppError = require("../utils/AppError");
 const normalizeProductData = require("../utils/normaliseProductData");
 
+/*product */
+
+/* fetch product */
 exports.fetchProductService = async (req, res) => {
   const { fetch } = req.query;
   const page = Math.max(1, Number(req.query.page) || 1);
@@ -123,6 +126,7 @@ exports.deleteProductSevice = async (req, res) => {
   });
   return deleteProduct;
 };
+/* user */
 // fetch user
 exports.fetchUserService = async (req, res) => {
   const page = Math.max(1, Number(req.query.page) || 1);
@@ -156,6 +160,9 @@ exports.fetchUserService = async (req, res) => {
   ]);
   return { users, total, limit, page };
 };
+
+/*order */
+
 // fetchOrders
 exports.fetchOrdersService = async (req, res) => {
   const page = Math.max(1, Number(req.query.page) || 1);
