@@ -2,7 +2,7 @@ const { default: mongoose } = require("mongoose");
 
 const transactionSchema = new mongoose.Schema({
   orderId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: true,
     ref: "orderModel", // optional: reference to Order model
   },

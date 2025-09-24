@@ -148,7 +148,7 @@ console.log(req.body.payload);
   await session.withTransaction(async () => {
     //  order update
     const order = await orderModel.updateOne(
-      { _id: order_id },
+      { orderId: order_id },
       { paymentStatus: "paid", payMethod: method },
       { new: true, session }
     );
