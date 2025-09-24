@@ -125,7 +125,7 @@ exports.orderPaymentService = async (req, res) => {
   const webhookSignature = req.get("x-razorpay-signature");
 
   const isValidWebhookSignature = validateWebhookSignature(
-    JSON.stringify(req.body.payload),
+    JSON.stringify(req.body),
     webhookSignature,
     process.env.RAZORPAY_WEBHOOK_SECRET
   );
@@ -133,7 +133,7 @@ exports.orderPaymentService = async (req, res) => {
   if (!isValidWebhookSignature) {
     throw new AppError("webhook signature is invalid", 400);
   }
-console.log(req.body);
+console.log(req.body.payload);
   const paymentEntity = req.body.payload.payment.entity;
   const { status, order_id, id, amount, currency, method } = paymentEntity;
 
