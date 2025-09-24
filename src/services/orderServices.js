@@ -86,7 +86,7 @@ exports.orderMakingService = async (req, res) => {
     amount: totalPrice * 100,
     currency: "INR",
   });
-console.log(razorPayOrder);
+
 
  const newOrder = await orderModel.create({
     userId: user._id,
@@ -119,7 +119,7 @@ console.log(razorPayOrder);
 };
 
 exports.orderPaymentService = async (req, res) => {
-    console.log("hook call open");
+
 
   const session = await mongoose.startSession();
   const webhookSignature = req.get("x-razorpay-signature");
@@ -133,7 +133,7 @@ exports.orderPaymentService = async (req, res) => {
   if (!isValidWebhookSignature) {
     throw new AppError("webhook signature is invalid", 400);
   }
-console.log(req.body.payload);
+
   const paymentEntity = req.body.payload.payment.entity;
   const { status,order_id, id, amount, currency, method } = paymentEntity;
 
@@ -196,7 +196,6 @@ console.log(req.body.payload);
       );
     }
   });
-  console.log("hook call close");
 
   return status;
 };
