@@ -147,11 +147,12 @@ console.log(req.body.payload);
 
   await session.withTransaction(async () => {
     //  order update
-    const order = await orderModel.updateOne(
-      { orderId: order_id },
-      { paymentStatus: "paid", payMethod: method },
-      { new: true, session }
-    );
+  const order = await orderModel.findOneAndUpdate(
+  { orderId: order_id },
+  { paymentStatus: "paid", payMethod: method },
+  { new: true, session } // returns the updated document
+);
+
     // record on transaction
     await transactionModel.create(
       [
