@@ -7,5 +7,5 @@ const catchAsync = require("../../utils/catchAsync.js");
 
 orderRouter.get("/read",auth,catchAsync(orderController.readOrder))
 orderRouter.post("/process", auth,catchAsync(orderController.orderMaking) )
-orderRouter.patch("/payment/webhook",catchAsync(orderController.orderPayment))
+orderRouter.post("/payment/webhook",catchAsync(orderController.orderPayment))
 module.exports = { orderRouter, }
