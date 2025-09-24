@@ -161,7 +161,7 @@ console.log(req.body.payload);
           userId: order.userId,
           amount,
           currency,
-          payMethod: method,
+          paymentMethod: method,
           status,
         },
       ],
