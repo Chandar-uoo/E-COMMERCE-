@@ -125,7 +125,7 @@ exports.orderPaymentService = async (req, res) => {
   const webhookSignature = req.get("x-razorpay-signature");
 
   const isValidWebhookSignature = validateWebhookSignature(
-    JSON.stringify(req.body),
+    JSON.stringify(req.body.payload),
     webhookSignature,
     process.env.RAZORPAY_WEBHOOK_SECRET
   );
