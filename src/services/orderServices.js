@@ -117,7 +117,10 @@ exports.orderMakingService = async (req, res) => {
 
   return { newOrder, razorPayInfo };
 };
+
 exports.orderPaymentService = async (req, res) => {
+    console.log("hook call open");
+
   const session = await mongoose.startSession();
   const webhookSignature = req.get("x-razorpay-signature");
 
@@ -189,6 +192,7 @@ exports.orderPaymentService = async (req, res) => {
       );
     }
   });
+  console.log("hook call close");
 
   return status;
 };
