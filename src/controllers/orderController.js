@@ -11,20 +11,23 @@ exports.readOrder =  async(req,res)=>{
 }
 exports.orderMaking = async (req, res) => {
 
-    const order = await orderServices.orderMakingService(req,res);
+    const {newOrder,razorPayInfo} = await orderServices.orderMakingService(req,res);
 
     res.status(200).json({
         success: true,
         message:"order created",
-        result: order,
+        result: {
+            order:newOrder,
+            razorPay:razorPayInfo
+        },
     })
 }
 exports.orderPayment = async (req, res) => {
    
-const order = await orderServices.orderPaymentService(req,res);
+const orderStatus = await orderServices.orderPaymentService(req,res);
     res.status(200).json({
         success: true,
-        message: "order shipped",
+        message: `order has been ${orderStatus}`,
         result: order,
     })
 

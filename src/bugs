@@ -1,0 +1,9 @@
+*  if no say authoriztion like no bear token serverr stop 
+work on naming
+front end add minni loader on add cart
+creted an entry failed on db
+
+
+ const { subject, text } = orderReceiptTemplate(user, order, payMethod);
+  await sendEmail({ to: user.email, subject, text });
+  return order;

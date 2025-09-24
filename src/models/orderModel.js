@@ -41,13 +41,12 @@ const orderModel = new mongoose.Schema({
     },
     payMethod: {
         type: String,
-        enum: ["cod", "netPay", "idle"],
         default: "idle",
         required: true,
     },
     orderStatus: {
         type: String,
-        enum: ["cancelled", "processing", "delivered", "shipped", "idle"],
+        enum: ["cancelled", "processing", "delivered", "shipped", "idle","failed"],
         required: true,
         default: "idle"
     }

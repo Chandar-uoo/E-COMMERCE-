@@ -180,6 +180,7 @@ exports.fetchOrdersService = async (req, res) => {
     "delivered",
     "shipped",
     "all",
+    "failed"
   ];
 
   if (!allowedOrderStatus.includes(orderStatus)) {

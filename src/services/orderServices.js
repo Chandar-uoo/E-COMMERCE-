@@ -1,9 +1,14 @@
 const { default: mongoose } = require("mongoose");
 const orderModel = require("../models/orderModel");
 const productModel = require("../models/productModel");
+const transactionModel = require("../models/transaction");
 const AppError = require("../utils/AppError");
 const { sendEmail } = require("../utils/email");
-const {orderReceiptTemplate} = require("../utils/emailTemplates");
+const { orderReceiptTemplate } = require("../utils/emailTemplates");
+const { razorPayInstance } = require("../utils/razorPay");
+const {
+  validateWebhookSignature,
+} = require("razorpay/dist/utils/razorpay-utils");
 
 exports.readOrderService = async (req, res) => {
   const user = req.user;
@@ -86,40 +91,104 @@ exports.orderMakingService = async (req, res) => {
     payMethod: "idle",
   });
 
+  // inform razor pay
+  const razorPayOrder = await razorPayInstance.orders.create({
+    amount: totalPrice * 100,
+    currency: "INR",
+    receipt: newOrder._id,
+  });
+
+  const razorPayInfo = {
+    orderId: razorPayOrder.id,
+    amount: razorPayOrder.amount,
+    currency: razorPayOrder.currency,
+    key_id: process.env.RAZORPAY_KEY_ID,
+    prefill: {
+      name: user.name,
+      email: user.email,
+      contact: user.phoneNo,
+    },
+  };
+
   await newOrder.populate({
     path: "items.productId",
     select: "title price thumbnail category description",
   });
 
-  return newOrder;
+  return { newOrder, razorPayInfo };
 };
-
 exports.orderPaymentService = async (req, res) => {
-  const user = req.user;
-  const { payMethod, orderId } = req.body;
+  const session = await mongoose.startSession();
+  const webhookSignature = req.get("x-razorpay-signature");
 
-  const allowedwaysPayment = ["cod", "netPay"];
-  if (!payMethod || !allowedwaysPayment.includes(payMethod)) {
-    throw new AppError("Invalid payment method", 400); // Fixed
-  }
-
-  if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
-    throw new AppError("Invalid Order ID", 400);
-  }
-
-  const order = await orderModel.findByIdAndUpdate(
-    orderId,
-    {
-      paymentStatus: "paid",
-      payMethod: payMethod,
-    },
-    { new: true }
+  const isValidWebhookSignature = validateWebhookSignature(
+    JSON.stringify(req.body),
+    webhookSignature,
+    process.env.RAZORPAY_WEBHOOK_SECRET
   );
 
-  if (!order) {
-    throw new AppError("Order not found", 404);
+  if (!isValidWebhookSignature) {
+    throw new AppError("webhook signature is invalid", 400);
   }
-const { subject, text } = orderReceiptTemplate(user, order, payMethod);
-  await sendEmail({ to: user.email, subject, text });
-  return order;
+
+  const paymentEntity = req.body.payload.payment.entity;
+  const { status, order_id, id, amount, currency, method } = paymentEntity;
+
+  if (status == "failed") {
+    await orderModel.findByIdAndUpdate(order_id, { orderStatus: "failed" });
+    return status;
+  }
+
+  await session.withTransaction(async () => {
+    //  order update
+    const order = await orderModel.findOneAndUpdate(
+      { _id: order_id },
+      { paymentStatus: "paid", payMethod: method },
+      { new: true, session }
+    );
+    // record on transaction
+    await transactionModel.create(
+      [
+        {
+          order_id,
+          paymentId: id,
+          userId: order.userId,
+          amount,
+          currency,
+          payMethod: method,
+          status,
+        },
+      ],
+      { session }
+    );
+    // product model updation
+
+    for (const item of order.items) {
+      const { productId, quantity } = item;
+
+      const product = await productModel.findById(productId);
+      const stock = product.stock - quantity;
+      let soldcount = product.soldCount;
+      let availabilityStatus = product.availabilityStatus;
+
+      if (stock < 0) throw new AppError("Invalid quantity", 400);
+      else if (stock === 0) availabilityStatus = "Out of Stock";
+      else if (stock <= 10) availabilityStatus = "Low Stock";
+      else availabilityStatus = "In Stock";
+
+      await productModel.updateOne(
+        { _id: productId },
+        {
+          $set: {
+            stock: stock,
+            availabilityStatus: availabilityStatus,
+            soldcount: soldcount,
+          },
+        },
+        { session }
+      );
+    }
+  });
+
+  return status;
 };
