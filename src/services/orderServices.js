@@ -97,6 +97,7 @@ exports.orderMakingService = async (req, res) => {
     currency: "INR",
     receipt: newOrder._id,
   });
+console.log(razorPayOrder);
 
   const razorPayInfo = {
     orderId: razorPayOrder.id,
@@ -135,17 +136,17 @@ exports.orderPaymentService = async (req, res) => {
   }
 console.log(req.body.payload);
   const paymentEntity = req.body.payload.payment.entity;
-  const { status, order_id, id, amount, currency, method } = paymentEntity;
+  const { status,receipt, id, amount, currency, method } = paymentEntity;
 
   if (status == "failed") {
-    await orderModel.findByIdAndUpdate(order_id, { orderStatus: "failed" });
+    await orderModel.findByIdAndUpdate(receipt, { orderStatus: "failed" });
     return status;
   }
 
   await session.withTransaction(async () => {
     //  order update
     const order = await orderModel.findOneAndUpdate(
-      { _id: order_id },
+      { _id: receipt },
       { paymentStatus: "paid", payMethod: method },
       { new: true, session }
     );
@@ -153,7 +154,7 @@ console.log(req.body.payload);
     await transactionModel.create(
       [
         {
-          order_id,
+          orderId:receipt,
           paymentId: id,
           userId: order.userId,
           amount,
