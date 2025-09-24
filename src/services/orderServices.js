@@ -81,8 +81,16 @@ exports.orderMakingService = async (req, res) => {
   // Round to 2 decimal places
   const totalPrice = Math.round(calculatedTotal * 100) / 100;
 
-  const newOrder = await orderModel.create({
+  // inform razor pay
+  const razorPayOrder = await razorPayInstance.orders.create({
+    amount: totalPrice * 100,
+    currency: "INR",
+  });
+console.log(razorPayOrder);
+
+ const newOrder = await orderModel.create({
     userId: user._id,
+    orderId:razorPayOrder.id,
     items: validItems,
     totalPrice: totalPrice,
     address: user.address,
@@ -90,15 +98,6 @@ exports.orderMakingService = async (req, res) => {
     orderStatus: "processing",
     payMethod: "idle",
   });
-
-  // inform razor pay
-  const razorPayOrder = await razorPayInstance.orders.create({
-    amount: totalPrice * 100,
-    currency: "INR",
-    receipt: newOrder._id,
-  });
-console.log(razorPayOrder);
-
   const razorPayInfo = {
     orderId: razorPayOrder.id,
     amount: razorPayOrder.amount,
@@ -136,17 +135,20 @@ exports.orderPaymentService = async (req, res) => {
   }
 console.log(req.body.payload);
   const paymentEntity = req.body.payload.payment.entity;
-  const { status,receipt, id, amount, currency, method } = paymentEntity;
+  const { status,order_id, id, amount, currency, method } = paymentEntity;
 
   if (status == "failed") {
-    await orderModel.findByIdAndUpdate(receipt, { orderStatus: "failed" });
+  await orderModel.updateOne(
+  { orderId: order_id },   
+  { $set: { orderStatus: "failed" } } 
+);
     return status;
   }
 
   await session.withTransaction(async () => {
     //  order update
-    const order = await orderModel.findOneAndUpdate(
-      { _id: receipt },
+    const order = await orderModel.updateOne(
+      { _id: order_id },
       { paymentStatus: "paid", payMethod: method },
       { new: true, session }
     );
@@ -154,7 +156,7 @@ console.log(req.body.payload);
     await transactionModel.create(
       [
         {
-          orderId:receipt,
+          orderId:order_id,
           paymentId: id,
           userId: order.userId,
           amount,
