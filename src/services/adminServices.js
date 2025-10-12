@@ -5,62 +5,44 @@ const { default: mongoose } = require("mongoose");
 const AppError = require("../utils/AppError");
 const normalizeProductData = require("../utils/normaliseProductData");
 
+
 /*product */
 
 /* fetch product */
 exports.fetchProductService = async (req, res) => {
-  const { fetch } = req.query;
+  const { fetch, availabilityStatus } = req.query;
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(100, Math.max(Number(req.query.limit) || 16));
   const skip = (page - 1) * limit;
-
-  if (!fetch || fetch.trim().length === 0) {
-    const [products, total] = await Promise.all([
-       productModel.find({}).limit(limit).skip(skip),
-       productModel.countDocuments(),
-    ]);
-    return { products, total, limit, page };
-  }
-
-  const filterQuery = {
-    $or: [
-      { ProductName: { $regex: fetch, $options: "i" } },
-      { category: { $regex: fetch, $options: "i" } },
-    ],
-  };
-  const [products, total] =  await Promise.all([
-     productModel.find(filterQuery).limit(limit).skip(skip).lean(),
-     productModel.countDocuments(filterQuery),
-  ]);
-  return { products, total, limit, page };
-};
-// filter product
-exports.filterProductSevice = async (req, res) => {
-  const page = Math.max(1, Number(req.query.page) || 1);
-  const limit = Math.min(100, Math.max(Number(req.query.limit) || 16));
-  const skip = (page - 1) * limit;
-  const { availabilityStatus } = req.query;
-  if (!availabilityStatus) {
-    throw new AppError("Bad request", 400);
-  }
   const filter = {};
-  const allowedAvailabiltyStatus = [
-    "In Stock",
-    "Out of Stock",
-    "Low Stock",
-    "Discontinued",
-  ];
 
-  if (!allowedAvailabiltyStatus.includes(availabilityStatus)) {
-    throw new AppError("invalid request", 400);
+  if (fetch && fetch.trim().length > 0) {
+    filter.$or = [
+      { ProductName: { $regex: fetch.trim(), $options: "i" } },
+      { category: { $regex: fetch.trim(), $options: "i" } },
+    ];
   }
 
-  filter.availabilityStatus = availabilityStatus;
+  if (availabilityStatus && availabilityStatus.trim().length > 0) {
+    const allowedAvailabilityStatus = [
+      "In Stock",
+      "Out of Stock",
+      "Low Stock",
+      "Discontinued",
+    ];
 
-  const [products, total] =  await Promise.all([
-     productModel.find(filter).limit(limit).skip(skip).lean(),
+    const trimmedStatus = availabilityStatus.trim();
 
-     productModel.find(filter).countDocuments(),
+    if (!allowedAvailabilityStatus.includes(trimmedStatus)) {
+      throw new AppError("Invalid availability status", 400);
+    }
+
+    filter.availabilityStatus = trimmedStatus;
+  }
+
+  const [products, total] = await Promise.all([
+    productModel.find(filter).limit(limit).skip(skip).lean(),
+    productModel.countDocuments(filter),
   ]);
 
   return { products, total, limit, page };
@@ -121,8 +103,7 @@ exports.deleteProductSevice = async (req, res) => {
 
   const deleteProduct = await productModel.findByIdAndUpdate(id, {
     isDeleted: true,
-    availabilityStatus:"Discontinued"
-
+    availabilityStatus: "Discontinued",
   });
   return deleteProduct;
 };
@@ -139,24 +120,24 @@ exports.fetchUserService = async (req, res) => {
       name: { $regex: fetchUser, $options: "i" },
     };
     const [users, total] = await Promise.all([
-       userModel
+      userModel
         .find(filterQuery)
         .select("name email DOB address phoneNo image")
         .limit(limit)
         .skip(skip),
-       userModel.find(filterQuery).countDocuments(),
+      userModel.find(filterQuery).countDocuments(),
     ]);
     return { users, total, limit, page };
   }
 
   const [users, total] = await Promise.all([
-     userModel
+    userModel
       .find({})
       .select("name email DOB address phoneNo image")
       .limit(limit)
       .skip(skip)
       .lean(),
-     userModel.find({}).countDocuments(),
+    userModel.find({}).countDocuments(),
   ]);
   return { users, total, limit, page };
 };
@@ -180,7 +161,7 @@ exports.fetchOrdersService = async (req, res) => {
     "delivered",
     "shipped",
     "all",
-    "failed"
+    "failed",
   ];
 
   if (!allowedOrderStatus.includes(orderStatus)) {
@@ -191,7 +172,7 @@ exports.fetchOrdersService = async (req, res) => {
     filter.orderStatus = orderStatus;
   }
   const [orders, total] = await Promise.all([
-     orderModel
+    orderModel
       .find(filter)
       .populate({
         path: "items.productId",
@@ -205,14 +186,17 @@ exports.fetchOrdersService = async (req, res) => {
       .skip(skip)
       .lean(),
 
-     orderModel.find(filter).countDocuments(),
+    orderModel.find(filter).countDocuments(),
   ]);
 
   return { orders, total, limit, page };
 };
 // update order as shipped
 exports.updateOrderStatusService = async (req, res) => {
+
+  
   const { id } = req.params;
+
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {
     throw new AppError("Bad Request", 400);
   }
