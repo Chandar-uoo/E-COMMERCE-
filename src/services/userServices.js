@@ -22,6 +22,8 @@ exports.updateUserDetailsService = async (req, res) => {
   if (!user) {
     throw new AppError("Please login", 401);
   }
+
+  
   const { name, DOB, image, phoneNo, address } = req.body;
 
   if (!name || !DOB || !image || !phoneNo || !address) {
@@ -39,7 +41,7 @@ exports.updateUserDetailsService = async (req, res) => {
   const updateUser = userModel.findByIdAndUpdate(
     user._id,
     {
-      name: userName,
+      name: name,
       DOB: DOB,
       image: image,
       phoneNo: phoneNo,
@@ -69,11 +71,16 @@ exports.updateUserPasswordService = async (req, res) => {
 
 exports.userEmailOtpSendService = async (req, res) => {
   const { email } = req.body;
-  if (!email || !validator.isEmail(email)) {
+  console.log(email);
+  const existingEmail =  await  userModel.findOne({email:email})
+  if(existingEmail){
+      throw new AppError("email already present", 400);
+  }
+  if ( !email || !validator.isEmail(email)) {
     throw new AppError("invalid email", 400);
   }
   const otp = otpGenrator();
-  const { subject, text } = otpVerificationTemplate(user.email, otp);
+  const { subject, text } = otpVerificationTemplate(email, otp);
   await verificationTokens.deleteMany({
     email: email,
     purpose: "EMAIL_VERIFY",
