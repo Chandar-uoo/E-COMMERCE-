@@ -6,24 +6,25 @@ const {roleCheck} =  require("../middleware/roleValidator");
 const adminController = require("../controllers/adminController");
 const { validateProductInput} =  require("../middleware/productValidator")
 const {auth}=  require("../middleware/authValidator")
-
+const adminDashBoardController = require("../controllers/admin/adminDashBoardController")
+//fetch admin dashBoard 
+adminRouter.get("/admin-dash-board",auth,roleCheck("admin"),catchAsync(adminDashBoardController.fetchAdminDashboardData))
 // get all profucts
-adminRouter.get("/products",auth,roleCheck("admin"),catchAsync(adminController.fetchProduct));
-
+adminRouter.get("/product",auth,roleCheck("admin"),catchAsync(adminController.fetchProduct));
 // add products
-adminRouter.post("/add-product",auth,roleCheck("admin"),validateProductInput,catchAsync(adminController.addProduct));
+adminRouter.post("/product/add-product",auth,roleCheck("admin"),validateProductInput,catchAsync(adminController.addProduct));
 // filter product
-adminRouter.get("/filter",auth,roleCheck("admin"),catchAsync(adminController.filterProduct))
+adminRouter.get("/product/filter",auth,roleCheck("admin"),catchAsync(adminController.filterProduct))
 // edit products
-adminRouter.patch("/update-product",auth,roleCheck("admin"),validateProductInput,catchAsync(adminController.updateProduct))
+adminRouter.patch("/product/update-product",auth,roleCheck("admin"),validateProductInput,catchAsync(adminController.updateProduct))
 // delete product 
-adminRouter.delete("/delete-product/:id",auth,roleCheck("admin"),catchAsync(adminController.deleteProduct));
+adminRouter.delete("/product/delete-product/:id",auth,roleCheck("admin"),catchAsync(adminController.deleteProduct));
 // fetch order
-adminRouter.get("/orders",auth,roleCheck("admin"),catchAsync(adminController.fetchOrder));
+adminRouter.get("/order",auth,roleCheck("admin"),catchAsync(adminController.fetchOrder));
 // fetch user
 adminRouter.get("/user",auth,roleCheck("admin"),catchAsync(adminController.fetchUser));
 //fetch order = paid & paymentStatus processing
-adminRouter.patch("/update-Order-Status/:id",auth,catchAsync(adminController.updateOrderStatus));
+adminRouter.patch("/order/update-order-status/:id",auth,catchAsync(adminController.updateOrderStatus));
 
 
 module.exports = {adminRouter}; 
