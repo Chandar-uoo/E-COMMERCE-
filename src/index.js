@@ -10,7 +10,6 @@ const { cartRouter } = require("./routes/cartRouter/cartrouter.js");
 const { orderRouter } = require("./routes/orderRouter/order.js");
 const { userRouter } = require("./routes/userRoutes/userRouter.js");
 const { adminRouter } = require("./routes/adminRoutes.js");
-const {reviewRouter} =  require("./routes/reviewRoutes.js");
 
 const { startOrderCleaner } = require('./cron/orderCleaner.js');
 require('dotenv').config();
@@ -42,8 +41,7 @@ app.use(cookieParser())
 
 // product
 app.use("/api/admin", adminRouter)
-app.use("/api/products", productRouter);
-app.use("/api/review",reviewRouter)
+app.use("/api/product", productRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter)
 app.use("/api/cart", cartRouter);
