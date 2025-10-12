@@ -58,7 +58,7 @@ const userUpdateDetailsValidations =  async ({name,DOB,phoneNo,user,image,addres
   const existingPhoneNo = await userModel.findOne({ phoneNo });
 
   if (
-    (existingPhoneNo && !user.phoneNo === phoneNo) ||
+    (existingPhoneNo && user.phoneNo !== phoneNo) ||
     !validator.isMobilePhone(phoneNo)
   ) {
     throw new AppError("invalid phone number", 400);
