@@ -83,7 +83,7 @@ exports.readCartService = async (req, res) => {
         if (!user) {
             throw new AppError("Unauthorized", 403);
         }
-        const cart  = await cartModel.findOne({user:user._id}).populate("items.product","title price thumbnail category description ").sort({ createdAt: -1 }).lean();
+        const cart  = await cartModel.findOne({user:user._id}).populate("items.product","title price thumbnail category description stock ").sort({ createdAt: -1 }).lean();
         return cart;
 }
 
@@ -133,6 +133,7 @@ exports.deleteCartServices = async (req,res) => {
   
     const {productId} = req.body;
     const user = req.user;
+    
     if ( !productId || !mongoose.Types.ObjectId.isValid(productId)) {
        throw new AppError("Bad Request: Invalid ID", 400);
    }
