@@ -40,7 +40,7 @@ exports.orderMakingService = async (req, res) => {
   }
 
   const { itemsFromClient } = req.body;
-console.log(itemsFromClient);
+
 
   if (!itemsFromClient || itemsFromClient.length === 0) {
     throw new AppError("No items provided", 400);
