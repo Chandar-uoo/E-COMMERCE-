@@ -1,7 +1,7 @@
 const { default: mongoose } = require("mongoose");
 const productModel = require("../models/productModel");
 const AppError = require("../utils/AppError");
-
+const reviewModel = require("../models/reviewModel");
 exports.getProductbyFilterService = async (req, res) => {
   const {
     search,
@@ -86,11 +86,49 @@ exports.singleProductService = async (req, res) => {
     options: { sort: { createdAt: 1 } },
     populate: {
       path: "user", // if you want user info inside each review
-      select: "name", // only include name and email
+      select: "name", 
     },
   });
   if (!data) {
     throw new AppError("Invalid request: data not found", 404);
   }
   return data;
+};
+
+exports.createReviewService = async (req, res) => {
+  const { comment, rating } = req.body;
+  const { id } = req.params;
+
+  const user = req.user;
+  if (!comment || !rating || !id || !user) {
+    throw new AppError("BAD_REQUEST", 400);
+  }
+  // validate string  & rating
+  if (typeof comment !== "string" || comment.trim().length < 1) {
+    throw new AppError("Invalid comment", 400);
+  }
+
+  if (typeof rating !== "number" || rating < 1 || rating > 5) {
+    throw new AppError("Invalid rating", 400);
+  }
+
+  const isProduct = await productModel.exists({ _id: id });
+  if (!isProduct) {
+    throw new AppError("NO PRODUCT FOUND", 404);
+  }
+  // checking user already review this product
+  const isExisting = await reviewModel.findOne({
+    user: user._id,
+    product: id,
+  });
+  if (isExisting) {
+    throw new AppError("Already user review this product", 400);
+  }
+  const newReview = await reviewModel.create({
+    user: user._id,
+    product: id,
+    comment,
+    rating,
+  });
+  return newReview;
 };

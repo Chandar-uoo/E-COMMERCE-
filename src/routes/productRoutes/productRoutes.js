@@ -13,6 +13,8 @@ productRouter.get('/search-product',auth,catchAsync(productController.searchProd
 productRouter.get("/", auth,catchAsync(productController.allProducts));
 // single product
 productRouter.get("/:id",auth,catchAsync(productController.singleProduct) );
+//review 
+productRouter.post("/review/:id",auth,catchAsync(productController.createtProductReview));
 
 module.exports = {
     productRouter,
