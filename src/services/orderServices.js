@@ -40,6 +40,7 @@ exports.orderMakingService = async (req, res) => {
   }
 
   const { itemsFromClient } = req.body;
+console.log(itemsFromClient);
 
   if (!itemsFromClient || itemsFromClient.length === 0) {
     throw new AppError("No items provided", 400);
@@ -80,6 +81,9 @@ exports.orderMakingService = async (req, res) => {
 
   // Round to 2 decimal places
   const totalPrice = Math.round(calculatedTotal * 100) / 100;
+  if (totalPrice > 500000) {
+    throw new AppError("Amount exceeds Razorpay order limit of ₹5,00,000",400);
+  }
 
   // inform razor pay
   const razorPayOrder = await razorPayInstance.orders.create({
@@ -87,10 +91,9 @@ exports.orderMakingService = async (req, res) => {
     currency: "INR",
   });
 
-
- const newOrder = await orderModel.create({
+  const newOrder = await orderModel.create({
     userId: user._id,
-    orderId:razorPayOrder.id,
+    orderId: razorPayOrder.id,
     items: validItems,
     totalPrice: totalPrice,
     address: user.address,
@@ -119,8 +122,6 @@ exports.orderMakingService = async (req, res) => {
 };
 
 exports.orderPaymentService = async (req, res) => {
-
-
   const session = await mongoose.startSession();
   const webhookSignature = req.get("x-razorpay-signature");
 
@@ -135,29 +136,29 @@ exports.orderPaymentService = async (req, res) => {
   }
 
   const paymentEntity = req.body.payload.payment.entity;
-  const { status,order_id, id, amount, currency, method } = paymentEntity;
+  const { status, order_id, id, amount, currency, method } = paymentEntity;
 
   if (status == "failed") {
-  await orderModel.updateOne(
-  { orderId: order_id },   
-  { $set: { orderStatus: "failed" } } 
-);
+    await orderModel.updateOne(
+      { orderId: order_id },
+      { $set: { orderStatus: "failed" } }
+    );
     return status;
   }
 
   await session.withTransaction(async () => {
     //  order update
-  const order = await orderModel.findOneAndUpdate(
-  { orderId: order_id },
-  { paymentStatus: "paid", payMethod: method },
-  { new: true, session } // returns the updated document
-);
+    const order = await orderModel.findOneAndUpdate(
+      { orderId: order_id },
+      { $set: { paymentStatus: "paid", payMethod: method } },
+      { new: true, session } // returns the updated document
+    );
 
     // record on transaction
     await transactionModel.create(
       [
         {
-          orderId:order_id,
+          orderId: order_id,
           paymentId: id,
           userId: order.userId,
           amount,
@@ -175,7 +176,7 @@ exports.orderPaymentService = async (req, res) => {
 
       const product = await productModel.findById(productId);
       const stock = product.stock - quantity;
-      let soldcount = product.soldCount;
+      let soldcount = product.soldCount + quantity;
       let availabilityStatus = product.availabilityStatus;
 
       if (stock < 0) throw new AppError("Invalid quantity", 400);
