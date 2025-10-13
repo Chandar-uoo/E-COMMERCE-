@@ -211,7 +211,7 @@ exports.updateOrderStatusService = async (req, res) => {
   }
 
   if (order.paymentStatus !== "paid") {
-    throw new AppError("Payment has not been completed for this product", 409);
+    throw new AppError("Payment has not been done for this product", 409);
   }
 
   order.orderStatus = "shipped";
