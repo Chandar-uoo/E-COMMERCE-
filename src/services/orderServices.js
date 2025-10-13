@@ -186,8 +186,9 @@ exports.orderPaymentService = async (req, res) => {
       else if (stock === 0) availabilityStatus = "Out of Stock";
       else if (stock <= 10) availabilityStatus = "Low Stock";
       else availabilityStatus = "In Stock";
-
-      await productModel.updateOne(
+      console.log( "curr" + product.soldCount + "sold"+ soldcount);
+      
+   const productResult =   await productModel.findOneAndUpdate(
         { _id: productId },
         {
           $set: {
@@ -198,6 +199,8 @@ exports.orderPaymentService = async (req, res) => {
         },
         { session }
       );
+      console.log(productResult);
+      
     }
   });
 console.log("done good");
