@@ -80,14 +80,17 @@ exports.orderMakingService = async (req, res) => {
   }
 
   // Round to 2 decimal places
+  
   const totalPrice = Math.round(calculatedTotal * 100) / 100;
   if (totalPrice > 500000) {
     throw new AppError("Amount exceeds Razorpay order limit of ₹5,00,000",400);
   }
+const amountInPaise = Math.round(totalPrice * 100);
+
 
   // inform razor pay
   const razorPayOrder = await razorPayInstance.orders.create({
-    amount: totalPrice * 100,
+    amount: amountInPaise,
     currency: "INR",
   });
 
