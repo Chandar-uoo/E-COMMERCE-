@@ -200,6 +200,7 @@ exports.orderPaymentService = async (req, res) => {
       );
     }
   });
+console.log("done good");
 
   return status;
 };
