@@ -178,29 +178,26 @@ exports.orderPaymentService = async (req, res) => {
       const { productId, quantity } = item;
 
       const product = await productModel.findById(productId);
-      const stock = product.stock - quantity;
-      let soldcount = product.soldCount + quantity;
-      let availabilityStatus = product.availabilityStatus;
+      const updatedStock = product.stock - quantity;
+      let updatedSoldCount = product.soldCount + quantity;
+      let updatedAvailabilityStatus = product.availabilityStatus;
 
-      if (stock < 0) throw new AppError("Invalid quantity", 400);
-      else if (stock === 0) availabilityStatus = "Out of Stock";
-      else if (stock <= 10) availabilityStatus = "Low Stock";
-      else availabilityStatus = "In Stock";
-      console.log( "curr" + product.soldCount + "sold"+ soldcount);
+      if (updatedStock < 0) throw new AppError("Invalid quantity", 400);
+      else if (updatedStock === 0) updatedAvailabilityStatus = "Out of Stock";
+      else if (updatedStock <= 10) updatedAvailabilityStatus = "Low Stock";
+      else updatedAvailabilityStatus = "In Stock";
       
-   const productResult =   await productModel.findOneAndUpdate(
+    await productModel.updateOne(
         { _id: productId },
         {
           $set: {
-            stock: stock,
-            availabilityStatus: availabilityStatus,
-            soldcount: soldcount,
+            stock:updatedStock,
+            availabilityStatus: updatedAvailabilityStatus,
+            soldCount: updatedSoldCount,
           },
         },
         { session }
-      );
-      console.log(productResult);
-      
+      );      
     }
   });
 console.log("done good");
