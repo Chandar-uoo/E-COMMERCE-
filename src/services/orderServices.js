@@ -192,15 +192,15 @@ exports.orderPaymentService = async (req, res) => {
     // extract id
     const productIds = order.items.map((item) => item.productId);
     console.log(productIds);
-    
+
     // fetch products
     const products = await productModel.find({ _id: { $in: productIds } });
     console.log(products);
-    
+
     // update latest info
     for (const item of order.items) {
       const { productId, quantity } = item;
-      const product = products.find((p) => p._id.toString() === productId);
+      const product = products.find((p) => p._id.equals(productId));
       if (!product) throw new AppError(`Product not found: ${productId} `, 404);
       const updatedStock = product.stock - quantity;
       let updatedSoldCount = product.soldCount + quantity;
