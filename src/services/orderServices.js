@@ -43,12 +43,13 @@ exports.orderMakingService = async (req, res) => {
     throw new AppError("No items provided", 400);
   }
 
-// Extract productIds
+  // Extract productIds
   const productIds = itemsFromClient.map((item) => item.productId);
 
-// validate product ids
+  // validate product ids
   const allValidIds = productIds.every((id) =>
-    mongoose.Types.ObjectId.isValid(id));
+    mongoose.Types.ObjectId.isValid(id)
+  );
   if (!allValidIds) {
     throw new AppError("Invalid product ID", 400);
   }
@@ -66,12 +67,17 @@ exports.orderMakingService = async (req, res) => {
   // ✅ Prepare validated items + total
   const validItems = [];
   let calculatedTotal = 0;
-   for (const item of itemsFromClient) {
+  for (const item of itemsFromClient) {
     const { productId, quantity } = item;
     const currProduct = products.find((p) => p._id.toString() === productId);
-    if (!quantity || typeof quantity !== "number" || quantity <= 0 || quantity > currProduct.stock) {
-    throw new AppError(`Invalid quantity for ${currProduct.title}`, 400);
-  }
+    if (
+      !quantity ||
+      typeof quantity !== "number" ||
+      quantity <= 0 ||
+      quantity > currProduct.stock
+    ) {
+      throw new AppError(`Invalid quantity for ${currProduct.title}`, 400);
+    }
 
     // Calculate total price on server side
     calculatedTotal += parseFloat(currProduct.price) * quantity;
@@ -109,7 +115,7 @@ exports.orderMakingService = async (req, res) => {
     payMethod: "idle",
   });
 
-  // extracting info for front end 
+  // extracting info for front end
   const razorPayInfo = {
     orderId: razorPayOrder.id,
     amount: razorPayOrder.amount,
@@ -139,7 +145,8 @@ exports.orderPaymentService = async (req, res) => {
   const isValidWebhookSignature = validateWebhookSignature(
     JSON.stringify(req.body),
     webhookSignature,
-    process.env.RAZORPAY_WEBHOOK_SECRET);
+    process.env.RAZORPAY_WEBHOOK_SECRET
+  );
   if (!isValidWebhookSignature) {
     throw new AppError("webhook signature is invalid", 400);
   }
@@ -182,14 +189,19 @@ exports.orderPaymentService = async (req, res) => {
     );
     // product model updation
 
- // extract id 
-const productIds =  order.items.map((item) => item.productId);
-// fetch products
-const products =  await productModel.find({_id:{$in:productIds}});
-// update latest info
+    // extract id
+    const productIds = order.items.map((item) => item.productId);
+    console.log(productIds);
+    
+    // fetch products
+    const products = await productModel.find({ _id: { $in: productIds } });
+    console.log(products);
+    
+    // update latest info
     for (const item of order.items) {
       const { productId, quantity } = item;
-      const product =  products.find(p => p._id.toString() === productId);
+      const product = products.find((p) => p._id.toString() === productId);
+      if (!product) throw new AppError(`Product not found: ${productId} `, 404);
       const updatedStock = product.stock - quantity;
       let updatedSoldCount = product.soldCount + quantity;
       let updatedAvailabilityStatus = product.availabilityStatus;
