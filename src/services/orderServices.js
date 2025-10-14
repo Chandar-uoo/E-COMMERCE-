@@ -3,8 +3,6 @@ const orderModel = require("../models/orderModel");
 const productModel = require("../models/productModel");
 const transactionModel = require("../models/transaction");
 const AppError = require("../utils/AppError");
-const { sendEmail } = require("../utils/email");
-const { orderReceiptTemplate } = require("../utils/emailTemplates");
 const { razorPayInstance } = require("../utils/razorPay");
 const {
   validateWebhookSignature,
@@ -33,6 +31,7 @@ exports.readOrderService = async (req, res) => {
     .lean();
   return data;
 };
+
 exports.orderMakingService = async (req, res) => {
   const user = req.user;
   if (!user) {
@@ -40,60 +39,65 @@ exports.orderMakingService = async (req, res) => {
   }
 
   const { itemsFromClient } = req.body;
-
-
   if (!itemsFromClient || itemsFromClient.length === 0) {
     throw new AppError("No items provided", 400);
   }
 
+// Extract productIds
+  const productIds = itemsFromClient.map((item) => item.productId);
+
+// validate product ids
+  const allValidIds = productIds.every((id) =>
+    mongoose.Types.ObjectId.isValid(id));
+  if (!allValidIds) {
+    throw new AppError("Invalid product ID", 400);
+  }
+
+  // ✅ Fetch all products
+  const products = await productModel.find({ _id: { $in: productIds } });
+  if (products.length != productIds.length) {
+    const foundProductIds = products.map((product) => product._id);
+    const missingIds = productIds.filter((id) => !foundProductIds.includes(id));
+    if (missingIds) {
+      throw new AppError(`Products not found: ${missingIds.join(" , ")}`, 404);
+    }
+  }
+
+  // ✅ Prepare validated items + total
   const validItems = [];
   let calculatedTotal = 0;
-
-  for (const item of itemsFromClient) {
+   for (const item of itemsFromClient) {
     const { productId, quantity } = item;
-
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-      throw new AppError("Invalid product ID", 400);
-    }
-
-    const product = await productModel.findById(productId);
-    if (!product) {
-      throw new AppError(`Product not found: ${productId}`, 404);
-    }
-
-    if (
-      quantity === undefined ||
-      typeof quantity !== "number" ||
-      quantity <= 0 ||
-      quantity > product.stock
-    ) {
-      throw new AppError("Invalid quantity", 400);
-    }
+    const currProduct = products.find((p) => p._id.toString() === productId);
+    if (!quantity || typeof quantity !== "number" || quantity <= 0 || quantity > currProduct.stock) {
+    throw new AppError(`Invalid quantity for ${currProduct.title}`, 400);
+  }
 
     // Calculate total price on server side
-    calculatedTotal += parseFloat(product.price) * quantity;
+    calculatedTotal += parseFloat(currProduct.price) * quantity;
 
     validItems.push({
-      productId: product._id,
+      productId: currProduct._id,
       quantity: quantity,
     });
   }
 
   // Round to 2 decimal places
-  
   const totalPrice = Math.round(calculatedTotal * 100) / 100;
+
+  // razory pay max amt validation
   if (totalPrice > 500000) {
-    throw new AppError("Amount exceeds Razorpay order limit of ₹5,00,000",400);
+    throw new AppError("Amount exceeds Razorpay order limit of ₹5,00,000", 400);
   }
-const amountInPaise = Math.round(totalPrice * 100);
 
-
-  // inform razor pay
+  // create rzpy instance
+  const amountInPaise = Math.round(totalPrice * 100);
   const razorPayOrder = await razorPayInstance.orders.create({
     amount: amountInPaise,
     currency: "INR",
   });
 
+  // create order
   const newOrder = await orderModel.create({
     userId: user._id,
     orderId: razorPayOrder.id,
@@ -104,6 +108,8 @@ const amountInPaise = Math.round(totalPrice * 100);
     orderStatus: "processing",
     payMethod: "idle",
   });
+
+  // extracting info for front end 
   const razorPayInfo = {
     orderId: razorPayOrder.id,
     amount: razorPayOrder.amount,
@@ -116,6 +122,7 @@ const amountInPaise = Math.round(totalPrice * 100);
     },
   };
 
+  //  Populate & Prepare Response
   await newOrder.populate({
     path: "items.productId",
     select: "title price thumbnail category description",
@@ -128,19 +135,20 @@ exports.orderPaymentService = async (req, res) => {
   const session = await mongoose.startSession();
   const webhookSignature = req.get("x-razorpay-signature");
 
+  //validate sign
   const isValidWebhookSignature = validateWebhookSignature(
     JSON.stringify(req.body),
     webhookSignature,
-    process.env.RAZORPAY_WEBHOOK_SECRET
-  );
-
+    process.env.RAZORPAY_WEBHOOK_SECRET);
   if (!isValidWebhookSignature) {
     throw new AppError("webhook signature is invalid", 400);
   }
 
+  // extracting input
   const paymentEntity = req.body.payload.payment.entity;
   const { status, order_id, id, amount, currency, method } = paymentEntity;
 
+  // for cancelled payment
   if (status == "failed") {
     await orderModel.updateOne(
       { orderId: order_id },
@@ -174,10 +182,14 @@ exports.orderPaymentService = async (req, res) => {
     );
     // product model updation
 
+ // extract id 
+const productIds =  order.items.map((item) => item.productId);
+// fetch products
+const products =  await productModel.find({_id:{$in:productIds}});
+// update latest info
     for (const item of order.items) {
       const { productId, quantity } = item;
-
-      const product = await productModel.findById(productId);
+      const product =  products.find(p => p._id.toString() === productId);
       const updatedStock = product.stock - quantity;
       let updatedSoldCount = product.soldCount + quantity;
       let updatedAvailabilityStatus = product.availabilityStatus;
@@ -186,21 +198,20 @@ exports.orderPaymentService = async (req, res) => {
       else if (updatedStock === 0) updatedAvailabilityStatus = "Out of Stock";
       else if (updatedStock <= 10) updatedAvailabilityStatus = "Low Stock";
       else updatedAvailabilityStatus = "In Stock";
-      
-    await productModel.updateOne(
+      await productModel.updateOne(
         { _id: productId },
         {
           $set: {
-            stock:updatedStock,
+            stock: updatedStock,
             availabilityStatus: updatedAvailabilityStatus,
             soldCount: updatedSoldCount,
           },
         },
         { session }
-      );      
+      );
     }
   });
-console.log("done good");
+  console.log("done good");
 
   return status;
 };
