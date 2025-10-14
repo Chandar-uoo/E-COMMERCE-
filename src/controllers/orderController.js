@@ -28,7 +28,6 @@ const orderStatus = await orderServices.orderPaymentService(req,res);
     res.status(200).json({
         success: true,
         message: `order has been ${orderStatus}`,
-        result: order,
     })
 
 }

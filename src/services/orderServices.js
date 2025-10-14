@@ -191,11 +191,9 @@ exports.orderPaymentService = async (req, res) => {
 
     // extract id
     const productIds = order.items.map((item) => item.productId);
-    console.log(productIds);
 
     // fetch products
     const products = await productModel.find({ _id: { $in: productIds } });
-    console.log(products);
 
     // update latest info
     for (const item of order.items) {
