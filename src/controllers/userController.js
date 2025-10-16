@@ -19,24 +19,15 @@ exports.userCheck = (req, res) => {
   });
 };
 exports.updateUserDetails = async (req, res) => {
-  const updatedUser = await userServices.updateUserDetailsService(req, res);
-  res.status(200).json({
+   await userServices.updateUserDetailsService(req, res);
+  res.status(204).json({
     success: true,
     message: "user details updated",
-    result: {
-      id: updatedUser._id,
-      name: updatedUser.name,
-      image: updatedUser.image,
-      address: updatedUser.address,
-      phoneNo: updatedUser.phoneNo,
-      DOB: updatedUser.DOB,
-      address: updatedUser.address,
-    },
   });
 };
 exports.updateUserPassword = async (req, res) => {
   await userServices.updateUserPasswordService(req, res);
-  res.status(200).json({
+  res.status(204).json({
     success: true,
     message: "succesuffuly password updated",
   });

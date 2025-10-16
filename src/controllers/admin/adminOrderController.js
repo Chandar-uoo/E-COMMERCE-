@@ -24,10 +24,9 @@ exports.fetchOrder = async (req, res) => {
 };
 
 exports.updateOrderStatus = async (req, res) => {
-  const data = await adminOrderService.updateOrderStatusService(req, res);
-  res.status(200).json({
+  await adminOrderService.updateOrderStatusService(req, res);
+  res.status(204).json({
     success: true,
     message: "admin replaced order status proceesing to shipped",
-    result: data,
   });
 };

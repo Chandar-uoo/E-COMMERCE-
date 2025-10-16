@@ -13,7 +13,7 @@ exports.orderMaking = async (req, res) => {
 
     const {newOrder,razorPayInfo} = await orderServices.orderMakingService(req,res);
 
-    res.status(200).json({
+    res.status(201).json({
         success: true,
         message:"order created",
         result: {

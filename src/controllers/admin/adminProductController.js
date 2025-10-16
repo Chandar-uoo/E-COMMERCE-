@@ -22,28 +22,25 @@ exports.fetchProduct = async (req, res) => {
 
 exports.addProduct = async (req, res) => {
   const data = await adminProductService.addProductService(req, res);
-  res.status(200).json({
+  res.status(201).json({
     success: true,
     message: "new product Added",
-    result: data,
   });
 };
 // update product
 
 exports.updateProduct = async (req, res) => {
   const data = await adminProductService.updateProductService(req, res);
-  res.status(200).json({
+  res.status(204).json({
     success: true,
     message: "product deatils updated",
-    result: data,
   });
 };
 // delete
 exports.deleteProduct = async (req, res) => {
-  const data = await adminProductService.deleteProductSevice(req, res);
-  res.status(200).json({
+   await adminProductService.deleteProductSevice(req, res);
+  res.status(204).json({
     success: true,
     message: "product deatils deleted",
-    result: data,
   });
 };

@@ -4,7 +4,7 @@ exports.signup = async (req, res) => {
     await authServices.signupService(req, res);
 
   res
-    .status(200)
+    .status(201)
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: false,
@@ -59,8 +59,8 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
-  const logoutUser = await authServices.logoutService(req, res);
-  res.status(200).json({
+   await authServices.logoutService(req, res);
+  res.status(204).json({
     success: true,
     message: "logout Suceesfully",
   });

@@ -4,7 +4,7 @@ const cartServices = require("../services/cartServices");
 
 exports.addToCart = async (req, res) => {
     const data = await cartServices.addToCartService(req, res);
-    res.status(200).json({
+    res.status(201).json({
         success: true,
         message: "successfully item added to cart",
         result: data
@@ -34,19 +34,17 @@ exports.updateCart = async (req, res) => {
 
 }
 exports.deleteCart = async (req, res) => {
-    const data = await cartServices.deleteCartServices(req, res);
+     await cartServices.deleteCartServices(req, res);
 
-    res.status(200).json({
+    res.status(204).json({
         sucess: true,
-        message: "sucess",
-        result:data
+        message: "sucessfully product removedd",
     })
 }
 exports.clearCart = async (req, res) => {
-    const data = await cartServices.clearCartService(req, res);
-    res.status(200).json({
+     await cartServices.clearCartService(req, res);
+    res.status(204).json({
         success: true,
         message: "cart cleared",
-        result: data
     })
 }

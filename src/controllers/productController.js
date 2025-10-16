@@ -36,16 +36,11 @@ exports.singleProduct = async (req, res) => {
   });
 };
 exports.createtProductReview =   async (req,res) => {
-    const data =  await productServices.createReviewService(req,res);
+     await productServices.createReviewService(req,res);
     
-     res.status(200).json({
+     res.status(201).json({
         success: true,
         message: ' review created successfully',
-        result:{
-             data,
-             isExist:true,
-        },
-        
     })
     
 }
