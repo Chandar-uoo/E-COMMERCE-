@@ -70,6 +70,8 @@ exports.orderMakingService = async (req, res) => {
   for (const item of itemsFromClient) {
     const { productId, quantity } = item;
     const currProduct = products.find((p) => p._id.toString() === productId);
+  if(currProduct.availabilityStatus === "Discontinued" || currProduct.stock <= 0)  throw new AppError("order for discontinued or low stock product cannot be created", 400);
+
     if (
       !quantity ||
       typeof quantity !== "number" ||
