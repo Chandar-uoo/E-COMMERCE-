@@ -90,27 +90,34 @@ exports.orderMakingService = async (req, res) => {
     });
   }
 
-  // Round to 2 decimal places
-  const totalPrice = Math.round(calculatedTotal * 100) / 100;
+// Convert calculated total to paise (integer) directly
+const amountInPaise = Math.round(calculatedTotal * 100);
 
-  // razory pay max amt validation
-  if (totalPrice > 500000) {
-    throw new AppError("Amount exceeds Razorpay order limit of ₹5,00,000", 400);
-  }
+// Razorpay max limit in paise for domestic account
+const razorpayMaxPaise = 25000 * 100; // 25,000 rupees in paise
 
-  // create rzpy instance
-  const amountInPaise = Math.round(totalPrice * 100);
-  const razorPayOrder = await razorPayInstance.orders.create({
-    amount: amountInPaise,
-    currency: "INR",
-  });
+// Validate max amount
+if (amountInPaise > razorpayMaxPaise) {
+  throw new AppError(
+    `Amount exceeds Razorpay domestic limit of ₹${razorpayMaxPaise / 100}`,
+    400
+  );
+}
+
+
+// Create Razorpay order
+const razorPayOrder = await razorPayInstance.orders.create({
+  amount: amountInPaise,
+  currency: "INR",
+});
+
 
   // create order
   const newOrder = await orderModel.create({
     userId: user._id,
     orderId: razorPayOrder.id,
     items: validItems,
-    totalPrice: totalPrice,
+    totalPrice: amountInPaise/100,
     address: user.address,
     paymentStatus: "unpaid",
     orderStatus: "processing",
