@@ -61,7 +61,7 @@ exports.updateUserPasswordService = async (req, res) => {
   const oldKey = oldPassword.trim();
   const isOldKeyValid = await bcrypt.compare(oldKey, user.password);
   if (!isOldKeyValid) {
-    throw new AppError("old password is invalid", 401);
+    throw new AppError("old password is invalid", 400);
   }
   const newHashedPassword = await bcrypt.hash(newPassword, 10);
   await userModel.findByIdAndUpdate(user._id, {
@@ -71,10 +71,9 @@ exports.updateUserPasswordService = async (req, res) => {
 
 exports.userEmailOtpSendService = async (req, res) => {
   const { email } = req.body;
-  console.log(email);
   const existingEmail =  await  userModel.findOne({email:email})
   if(existingEmail){
-      throw new AppError("email already present", 400);
+      throw new AppError("email already present", 409);
   }
   if ( !email || !validator.isEmail(email)) {
     throw new AppError("invalid email", 400);
