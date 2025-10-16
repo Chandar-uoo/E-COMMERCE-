@@ -19,7 +19,7 @@ exports.getProductbyFilterService = async (req, res) => {
   const skip = (page - 1) * limit;
   // Build filter object
   const filter = {};
-
+  filter.isDeleted = false;
   if (category) filter.category = category;
   if (brand) filter.brand = brand;
   if (tags && tags.length > 0) filter.tags = { $in: tags.split(",") };
@@ -72,7 +72,7 @@ exports.getProductbyFilterService = async (req, res) => {
 };
 
 exports.allProductService = async (req, res) => {
-  const products = await productModel.find().limit(30).lean();
+  const products = await productModel.find({isDeleted:false}).limit(30).lean();
   return products;
 };
 
@@ -130,5 +130,5 @@ exports.createReviewService = async (req, res) => {
     comment,
     rating,
   });
-  return newReview;
+  return ;
 };
