@@ -3,7 +3,7 @@ const AppError = require("../utils/AppError");
 const roleCheck = (requiredRole) => {
   return (req, res, next) => {
     if (!req.user) {
-      return next(new AppError("unAuthorised", 404));
+      return next(new AppError("unAuthorised", 401));
     }
 
     if (req.user?.role !== requiredRole) {
