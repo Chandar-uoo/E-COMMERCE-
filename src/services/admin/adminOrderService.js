@@ -16,12 +16,10 @@ exports.fetchOrdersService = async (req, res) => {
   const filter = {};
 
   const allowedOrderStatus = [
-    "cancelled",
     "processing",
     "delivered",
     "shipped",
     "all",
-    "failed",
   ];
 
   if (!allowedOrderStatus.includes(orderStatus)) {
@@ -74,5 +72,5 @@ exports.updateOrderStatusService = async (req, res) => {
 
   order.orderStatus = "shipped";
   await order.save();
-  return order;
+  return ;
 };
