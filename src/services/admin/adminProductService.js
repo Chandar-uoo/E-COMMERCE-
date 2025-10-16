@@ -53,8 +53,8 @@ exports.addProductService = async (req, res) => {
     throw new AppError("Product is already available", 409);
   }
 
-  const newProduct = await productModel.create(productData);
-  return newProduct;
+   await productModel.create(productData);
+  return ;
 };
 
 // Update product
@@ -72,7 +72,7 @@ exports.updateProductService = async (req, res) => {
 
   const normalizedUpdates = normalizeProductData(updateFields);
 
-  const updatedProduct = await productModel.findByIdAndUpdate(
+   await productModel.findByIdAndUpdate(
     id,
     normalizedUpdates,
     {
@@ -81,7 +81,7 @@ exports.updateProductService = async (req, res) => {
     }
   );
 
-  return updatedProduct;
+  return ;
 };
 
 // delete product
@@ -96,9 +96,9 @@ exports.deleteProductSevice = async (req, res) => {
     throw new AppError("product not found", 404);
   }
 
-  const deleteProduct = await productModel.findByIdAndUpdate(id, {
+   await productModel.findByIdAndUpdate(id, {
     isDeleted: true,
     availabilityStatus: "Discontinued",
   });
-  return deleteProduct;
+  return;
 };
