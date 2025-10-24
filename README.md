@@ -1,137 +1,256 @@
 
+# 🛠️ RetailX E-Commerce Backend (Node.js + Express)
 
-# 🛠️  Retailx E-Commerce Backend (Node.js + Express)
-
-This is the backend for the E-Commerce web application. It provides RESTful APIs for user authentication, product management, cart operations, order handling, and admin functionalities.
+**RetailX Backend** powers the e-commerce application with **RESTful APIs** for authentication, product management, cart & orders, and admin functionalities.
 
 ---
 
 ## 🚀 Features
 
-## 🚀 Features  
+### 🔐 Authentication
 
-### 🔐 Authentication  
-- Login, Signup, JWT Access + Refresh Tokens  
-- Email verification (OTP on signup)  
-- Role-Based Access Control (User / Admin)  
+* 📝 **Signup & Login**: JWT-based authentication with access & refresh tokens
+* 📧 **Email Verification**: OTP-based verification during signup
+* 🔄 **Token Refresh**: Automatic access token renewal using refresh tokens
+* 🚪 **Secure Logout**: Cookie-based session management
 
-### 👤 User Management  
-- Profile update, Password change  
-- Admin: View/Search all users  
+### 👤 User Management
 
-### 🛍️ Products  
-- Users: View & Filter Products  
-- Admin: Create, Update, Delete Products  
+* 🧑‍💻 **Profile Management**: Update name, DOB, address, phone, image
+* 🔑 **Password Update**: Change password securely with old password verification
+* 📨 **Email Verification**: Send & verify OTP for email confirmation
+* 🛡️ **Admin Access**: View/search all users with pagination
 
-### 🛒 Cart  
-- Add / Update / Remove Items from Cart  
-- Auto-sync with backend  
+### 🛍️ Products
 
-### 📦 Orders  
-- Users: Place Orders, Simulated Payment (Cash / NetBanking)  
-- Email proof sent after payment  
-- Admin: Update order status (Processing → Shipped → Delivered)  
+* 🔍 **Browse Products**: Filter by category, brand, tags, price range, stock
+* 🧐 **Search**: Regex search across title, brand, category
+* 📊 **Sorting**: Price, popularity (sold count), latest
+* ⭐ **Product Reviews**: Users can rate and comment on products
+* 👨‍💼 **Admin Controls**: Add, update, soft-delete products, fetch with advanced filters
 
-### 📊 Admin Dashboard  
-- Manage Products  
-- Manage Users  
-- Manage Orders  
-- Ready for analytics/stats  
+### 🛒 Cart
 
-👉 **Admin-only actions**: Add/Update/Delete Product, Fetch All Users, Update Order Status  
-👉 **User actions**: Browse Products, Manage Cart, Place Orders, Make Payments, Verify Email  
+* ➕ **Add to Cart**: Auto price calculation
+* 🛒 **Read Cart**: View cart items with details
+* 🔄 **Update Quantity**: Modify item quantities
+* ❌ **Remove Items**: Delete products from cart
+* 🗑️ **Clear Cart**: Empty entire cart
+
+### 📦 Orders
+
+* 📝 **Create Orders**: Razorpay payment integration
+* 💳 **Payment Processing**:
+
+  * Razorpay checkout integration
+  * Webhook verification for confirmation
+  * Inventory auto-update on successful payment
+* 👨‍💼 **Admin Order Management**:
+
+  * Fetch orders by status
+  * Update order status
+  * View detailed order info
+
+### 📊 Admin Dashboard
+
+* 📈 **Overview Stats**:
+
+  * Total products
+  * Top 3 best-selling products
+  * Total revenue
+  * Pending orders count
+  * Total customers
+* 📊 **Analytics Ready**: Structured data for dashboards
+
+### 🔒 Security Features
+
+* 🛡️ **Helmet**: Security headers
+* 🌐 **CORS**: Frontend-origin allowed with credentials
+* ⏱️ **Rate Limiting**: 1000 requests/15min/IP
+* 🔐 **JWT Validation**: Secure routes
+* 🛡️ **RBAC**: Admin/User role separation
+* ✅ **Input Validation**: Comprehensive input checks
+* 🔑 **Password Hashing**: bcrypt
+
+### 🤖 Automation
+
+* ⏰ **Cron Jobs**: Cleanup unpaid orders after 10 minutes
 
 ---
 
 ## ⚙️ Tech Stack
 
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB + Mongoose
-- **Auth**: JWT (Access + Refresh Tokens)
-- **Validation**: express-validator
-- **Security**: CORS, Helmet, Rate Limiting
-- **Others**: dotenv, Morgan (logs), custom middleware
+| Technology                      | Purpose          |
+| ------------------------------- | ---------------- |
+| Node.js + Express.js v5.1.0     | Backend          |
+| MongoDB + Mongoose              | Database         |
+| JWT (Access + Refresh)          | Authentication   |
+| Razorpay                        | Payment Gateway  |
+| Nodemailer                      | Email service    |
+| Validator.js + Middleware       | Input validation |
+| Helmet + CORS + Rate Limit      | Security         |
+| Cron                            | Job Scheduling   |
+| dotenv, bcryptjs, cookie-parser | Utilities        |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-
 ecommerce-backend/
 │
-├── controllers/      # Route logic for auth, users, products, cart, orders
+├── controllers/      # Auth, users, products, cart, orders logic
 ├── models/           # Mongoose schemas
-├── routes/           # All API routes
-├── services/         # Business logic between controller and DB
-├── middleware/       # Auth, error, validators, RBAC
+├── routes/           # API routes
+├── services/         # Business logic
+├── middleware/       # Auth, validators, RBAC, error handling
 ├── utils/            # Token utils, error classes, config
-├── .env              # Environment variables (not pushed)
+├── .env              # Environment variables
 ├── server.js         # Entry point
-└── README.md         # You're here!
-
+└── README.md         # Documentation
 ```
 
 ---
 
 ## 🔐 Environment Variables (`.env`)
 
-Create a `.env` file at the root of your backend project:
+```env
+# Server
+PORT=3000
 
+# Database
+MONGO_URL=mongodb+srv://<username>:<password>@cluster.mongodb.net/ecommerce
+
+# JWT
+ACCESS_TOKEN=your_access_token_secret
+REFRESH_TOKEN=your_refresh_token_secret
+JWT_SECRET=your_jwt_secret
+
+# Frontend
+FRONTEND_URL=https://retailx666.netlify.app
+
+# Email (Gmail)
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_app_password
+
+# Razorpay
+RAZORPAY_KEY_ID=your_key_id
+RAZORPAY_KEY_SECRET=your_key_secret
+RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
 ```
 
-PORT=3000
-MONGODB\_URL=mongodb+srv://<username>:<password>@cluster.mongodb.net/ecommerce
-JWT\_SECRET=your\_jwt\_secret
-REFRESH\_SECRET=your\_refresh\_token\_secret
-FRONTEND\_URL=[http://localhost:5173](http://localhost:5173)
-
-````
-
-> 🔐 **Important:** Never push `.env` to GitHub. Add it to `.gitignore`.
+> 🔒 Never push `.env` to GitHub — add it to `.gitignore`.
 
 ---
 
 ## 📦 Setup & Run
 
 ```bash
-# 1. Clone the repo
+# Clone
 git clone https://github.com/Chandar-uoo/E-COMMERCE-
 cd ecommerce-backend
 
-# 2. Install dependencies
+# Install dependencies
 npm install
 
-# 3. Create .env file (see above)
+# Create .env file
 
-# 4. Run the server
-npm run dev
-````
+# Start server
+npm start
+```
+
+Server runs on `http://localhost:3000`
 
 ---
 
 ## 📮 API Documentation
 
-Use Postman or Thunder Client to explore the APIs.
-✔️ Organized into folders (Auth, Products, Cart, Orders, Admin)
+### 🔐 Authentication (`/api/auth`)
 
-> 📑 Coming Soon: Public Postman Documentation Link
+* `POST /signup` - Register user (email OTP)
+* `POST /login` - Login user
+* `GET /logout` - Logout
+* `GET /refresh-token` - Renew access token
+
+### 👤 User (`/api/user`)
+
+* `GET /user-check` - Current user details
+* `PATCH /update-user` - Update profile
+* `PATCH /update-password` - Change password
+* `POST /send-verification-otp` - Send OTP
+* `POST /verify-otp` - Verify OTP
+
+### 🛍️ Product (`/api/product`)
+
+* `GET /` - Get all products
+* `GET /search-product` - Search & filter
+* `GET /:id` - Single product with reviews
+* `POST /review/:id` - Add review
+
+### 🛒 Cart (`/api/cart`)
+
+* `POST /add` - Add item
+* `GET /read` - View cart
+* `PATCH /update` - Update quantity
+* `DELETE /delete` - Remove item
+* `DELETE /clear` - Clear cart
+
+### 📦 Orders (`/api/order`)
+
+* `GET /read` - User order history
+* `POST /process` - Create order
+* `POST /payment/webhook` - Razorpay webhook
+
+### 👨‍💼 Admin (`/api/admin`)
+
+* **Dashboard**: `GET /admin-dash-board`
+* **Products**: `GET /product`, `POST /product/add-product`, `PATCH /product/update-product`, `DELETE /product/delete-product/:id`
+* **Orders**: `GET /order`, `PATCH /order/update-order-status/:id`
+* **Users**: `GET /user`
+
+---
+
+## 🔑 API Authentication
+
+Include **access token** in request header:
+
+```
+Authorization: Bearer <your_access_token>
+```
+
+Admin routes require role `"admin"`.
+
+---
+
+## 💳 Payment Flow
+
+1. User creates order → backend generates Razorpay order
+2. Frontend displays Razorpay checkout
+3. User completes payment
+4. Razorpay webhook hits `/api/order/payment/webhook`
+5. Backend verifies signature
+6. On success:
+
+   * Order marked **paid**
+   * Inventory updated
+   * Transaction recorded
+ 
 
 ---
 
 ## 🗓 Versioning
 
-**Version**: `v1.0.0`
-**Status**: ✅ MVP Completed (Stable)
-**Last Updated**: August 2025
+* **v1.2.0** — MVP Completed ✅
+* Last Updated: October 2025
 
 ---
 
 ## 📈 Planned Features
 
-* [ ] 🔄 Stripe or Razorpay Payment Integration
-* [ ] 📦 Inventory Management
-* [ ] 🔐 Add email verification, password update
+* 🔄 Enhanced payment process
+* 📦 Inventory management + low-stock alerts
+* 📊 Extended admin analytics
+* 🔍 Product recommendation system
 
 ---
 
@@ -143,10 +262,14 @@ Use Postman or Thunder Client to explore the APIs.
 
 ---
 
-> ⭐ If you find this helpful, give a star and feel free to contribute!
+## 📄 License
 
-```
+ISC License
 
 ---
-.
-```
+
+> ⭐ If you find this helpful, give a star & contribute!
+
+---
+
+
