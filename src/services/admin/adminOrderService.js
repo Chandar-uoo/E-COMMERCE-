@@ -51,6 +51,7 @@ exports.fetchOrdersService = async (req, res) => {
 };
 // update order as shipped
 exports.updateOrderStatusService = async (req, res) => {
+  if(process.env.ADMIN_ACCESS==="DEMO") return;
   const { id } = req.params;
 
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {

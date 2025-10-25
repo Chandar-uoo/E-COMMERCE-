@@ -44,6 +44,7 @@ exports.fetchProductService = async (req, res) => {
 };
 // Add product
 exports.addProductService = async (req, res) => {
+  if(process.env.ADMIN_ACCESS==="DEMO") return;
   const productData = normalizeProductData(req.body.updateFields);
 
   const existingProduct = await productModel.findOne({
@@ -59,6 +60,7 @@ exports.addProductService = async (req, res) => {
 
 // Update product
 exports.updateProductService = async (req, res) => {
+  if(process.env.ADMIN_ACCESS==="DEMO") return;
   const { id, updateFields } = req.body;
 
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -86,6 +88,7 @@ exports.updateProductService = async (req, res) => {
 
 // delete product
 exports.deleteProductSevice = async (req, res) => {
+  if(process.env.ADMIN_ACCESS==="DEMO") return;
   const { id } = req.params;
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {
     throw new AppError("Bad Request", 400);
