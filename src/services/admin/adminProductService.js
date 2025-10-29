@@ -13,7 +13,8 @@ exports.fetchProductService = async (req, res) => {
 
   if (fetch && fetch.trim().length > 0) {
     filter.$or = [
-      { ProductName: { $regex: fetch.trim(), $options: "i" } },
+      { title: { $regex: fetch.trim(), $options: "i" } },
+       { brand: { $regex: fetch.trim(), $options: "i" } },
       { category: { $regex: fetch.trim(), $options: "i" } },
     ];
   }
